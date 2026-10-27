@@ -105,6 +105,89 @@ tr.click:hover td{background:#17293a}
 .mini b{color:var(--tx);font-size:18px}
 .ic.on{background:var(--az);color:#06121c}
 body.ajuste .det,body.ajuste .rod{display:none}
+/* ===== Mapa de faróis: 4 temas ===== */
+.temas{display:flex;align-items:center;gap:8px;margin-right:6px}
+.temas>span{color:var(--mut);font-size:14px}
+.temas .seg button{padding:8px 12px;font-size:13.5px}
+.mapawrap .mapa th.tit,.mapawrap .mapa th.sub{text-align:center}
+.mapawrap .mapa th.sub{white-space:nowrap}
+.mapa .tit .nm{display:inline-block;letter-spacing:.06em;text-transform:uppercase}
+.mapa .cint{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;height:100%;padding:12px 14px;text-align:left;gap:2px}
+.mapa .cint b{font-size:16px;letter-spacing:.04em;text-transform:uppercase}
+.mapa .cint span{font-size:12.5px;font-weight:600;opacity:.7}
+.mapa th.cin{vertical-align:bottom}
+.mapa .fi{transition:transform .15s}
+.mapa .cel:hover .fi{transform:scale(1.12)}
+/* Básico: claro e limpo */
+.t-basico .mapa{background:#fff;border-left-color:#fff;box-shadow:0 10px 30px -14px rgba(0,0,0,.5)}
+.t-basico .mapa th,.t-basico .mapa td{border-color:#d3d9df}
+.t-basico .mapa .tit{background:#f4f6f8;color:#14212c;font-size:16px;border-bottom:2px solid #14212c}
+.t-basico .mapa .sub{background:#f9fafb;color:#5d6b78;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.t-basico .mapa th.cin,.t-basico .mapa th.fx{background:#eef1f4;color:#14212c}
+.t-basico .mapa .ini{border-left:3px solid #14212c}
+.t-basico .mapa tbody tr:nth-child(even) td{background:#fafbfc}
+/* Escuro */
+.t-escuro .mapa{background:#0f1a24;border-left-color:#0f1a24;color:#e6edf3;box-shadow:inset 0 0 0 1px #223345}
+.t-escuro .mapa table{color:#e6edf3}
+.t-escuro .mapa th,.t-escuro .mapa td{border-color:#223345;color:#e6edf3}
+.t-escuro .mapa .tit{background:#16263a;color:#fff;font-size:16px;border-bottom:2px solid #4d9be0}
+.t-escuro .mapa .sub{background:#132131;color:#8fa6ba;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.t-escuro .mapa th.cin,.t-escuro .mapa th.fx{background:#16263a;color:#fff}
+.t-escuro .mapa .fx,.t-escuro .mapa .fx2,.t-escuro .mapa .fx3,.t-escuro .mapa .gr{background:#0f1a24}
+.t-escuro .mapa td.fx,.t-escuro .mapa td.fx2,.t-escuro .mapa td.fx3{box-shadow:inset -1px 0 0 #223345}
+.t-escuro .mapa .ini{border-left:3px solid #4d9be0}
+.t-escuro .mapa tbody tr:nth-child(even) td:not(.fx):not(.fx2):not(.fx3):not(.gr){background:#122030}
+.t-escuro .mapa .cel:hover{background:#1b3047!important}
+.t-escuro .mapa .vaz{color:#3c5266}
+.t-escuro .fi.vd .b{fill:#0f3320;stroke:#34c26a}.t-escuro .fi.vd .g{stroke:#6ff0a0}
+.t-escuro .fi.am .b{fill:#3a2b05;stroke:#f0b429}.t-escuro .fi.am .g{stroke:#ffd166}.t-escuro .fi.am .gd{fill:#ffd166}
+.t-escuro .fi.vm .b{fill:#3d1210;stroke:#ff5a4e}.t-escuro .fi.vm .g{stroke:#ff8a80}
+.t-escuro .fi.na .b{fill:#0f2547;stroke:#4c94ff}.t-escuro .fi.na .gt{fill:#9cc4ff}
+/* Premium: azul-noite com dourado */
+.t-premium .mapa{background:linear-gradient(180deg,#102236,#0b1622);border:1px solid rgba(200,169,106,.35);border-left:1px solid rgba(200,169,106,.35);padding:14px;color:#e8edf2;box-shadow:0 24px 50px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04)}
+.t-premium .mapa table{color:#e8edf2}
+.t-premium .mapa th,.t-premium .mapa td{border-color:rgba(200,169,106,.16);color:#e8edf2}
+.t-premium .mapa .tit{background:linear-gradient(180deg,#1a2f45,#13253a);color:#e7cf96;font-size:16px;font-weight:800;border-bottom:2px solid #c8a96a;padding:12px}
+.t-premium .mapa .sub{background:#0f1f30;color:#b9a473;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+.t-premium .mapa th.cin,.t-premium .mapa th.fx{background:linear-gradient(160deg,#1a2f45,#0f1f30);color:#e7cf96}
+.t-premium .mapa .eqn{color:#dfe7ee;font-weight:700}
+.t-premium .mapa .fx,.t-premium .mapa .fx2,.t-premium .mapa .fx3,.t-premium .mapa .gr{background:#0e1d2d;color:#f1f4f7}
+.t-premium .mapa td.n{color:#c8a96a}
+.t-premium .mapa .gr{color:#c8a96a}
+.t-premium .mapa td.fx,.t-premium .mapa td.fx2,.t-premium .mapa td.fx3{box-shadow:inset -1px 0 0 rgba(200,169,106,.3)}
+.t-premium .mapa .ini{border-left:2px solid #c8a96a}
+.t-premium .mapa tbody tr:nth-child(even) td:not(.fx):not(.fx2):not(.fx3):not(.gr){background:rgba(255,255,255,.025)}
+.t-premium .mapa .cel:hover{background:rgba(200,169,106,.14)!important}
+.t-premium .mapa .vaz{color:#44576b}
+.t-premium .fi .b{stroke:rgba(255,255,255,.18);stroke-width:1.5}
+.t-premium .fi.vd .b{fill:#2fa65a}.t-premium .fi.vd .g{stroke:#fff}
+.t-premium .fi.am .b{fill:#e6ad1c}.t-premium .fi.am .g{stroke:#3b2a00}.t-premium .fi.am .gd{fill:#3b2a00}
+.t-premium .fi.vm .b{fill:#d23b30}.t-premium .fi.vm .g{stroke:#fff}
+.t-premium .fi.na .b{fill:#2f74d6}.t-premium .fi.na .gt{fill:#fff}
+/* Super premium: vidro, luz e faróis acesos */
+.t-super .mapa{background:radial-gradient(900px 300px at 20% -10%,rgba(124,92,255,.25),transparent 60%),radial-gradient(900px 340px at 90% 0%,rgba(0,200,255,.18),transparent 60%),linear-gradient(180deg,#0b1020,#070b16);border:1px solid rgba(255,255,255,.12);border-left:1px solid rgba(255,255,255,.12);padding:16px;color:#eef2ff;box-shadow:0 30px 70px -30px rgba(0,0,0,.9),0 0 0 1px rgba(124,92,255,.15),inset 0 1px 0 rgba(255,255,255,.08)}
+.t-super .mapa table{color:#eef2ff;border-collapse:separate;border-spacing:0}
+.t-super .mapa th,.t-super .mapa td{border:0;border-right:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);color:#eef2ff}
+.t-super .mapa .tit{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));font-size:17px;padding:14px;border-bottom:1px solid rgba(255,255,255,.18)}
+.t-super .mapa .tit .nm{background:linear-gradient(90deg,#ffe3a3,#ffffff 45%,#a8c7ff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.t-super .mapa .sub{color:#9aa7d6;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;background:rgba(255,255,255,.02)}
+.t-super .mapa th.cin,.t-super .mapa th.fx{background:#11172b;color:#fff}
+.t-super .mapa .cint b{background:linear-gradient(90deg,#ffe3a3,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.t-super .mapa .eqn{color:#dfe6ff;font-weight:700}
+.t-super .mapa .fx,.t-super .mapa .fx2,.t-super .mapa .fx3,.t-super .mapa .gr{background:#0d1324;color:#f3f5ff}
+.t-super .mapa td.n{color:#a99cff}
+.t-super .mapa .gr{color:#a99cff}
+.t-super .mapa td.fx,.t-super .mapa td.fx2,.t-super .mapa td.fx3{box-shadow:inset -1px 0 0 rgba(255,255,255,.12)}
+.t-super .mapa .ini{border-left:1px solid rgba(255,227,163,.55)}
+.t-super .mapa tbody tr:hover td:not(.fx):not(.fx2):not(.fx3):not(.gr){background:rgba(255,255,255,.035)}
+.t-super .mapa .cel:hover{background:rgba(124,92,255,.18)!important}
+.t-super .mapa .vaz{color:#3a4466}
+.t-super .fi .b{stroke:rgba(255,255,255,.35);stroke-width:1.2}
+.t-super .fi .g{stroke:rgba(255,255,255,.92)}.t-super .fi .gd{fill:rgba(255,255,255,.92)}.t-super .fi .gt{fill:#fff}
+.t-super .fi.vd .b{fill:url(#spvd)}.t-super .fi.vd{filter:drop-shadow(0 0 5px rgba(54,224,126,.55))}
+.t-super .fi.am .b{fill:url(#spam)}.t-super .fi.am{filter:drop-shadow(0 0 5px rgba(255,198,41,.6))}.t-super .fi.am .g{stroke:#3b2600}.t-super .fi.am .gd{fill:#3b2600}
+.t-super .fi.vm .b{fill:url(#spvm)}.t-super .fi.vm{filter:drop-shadow(0 0 6px rgba(255,74,61,.65))}
+.t-super .fi.na .b{fill:url(#spna)}.t-super .fi.na{filter:drop-shadow(0 0 5px rgba(76,148,255,.55))}
 body.ajuste .wrap{padding-top:10px;padding-bottom:6px}
 body.ajuste header{margin-bottom:10px}
 body.ajuste .mapa-ctl{margin-bottom:8px}
@@ -162,7 +245,8 @@ const PARTE = {}; PARTES.forEach(p => { PARTE[p.k] = p; });
 const LS = 'mc.mapa.';
 const ls = { get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } } };
 const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('codigo', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
-S.ajuste = ls.get('ajuste', false);   // "Ajustar à tela" fica lembrado neste computador
+S.ajuste = ls.get('ajuste', false);
+S.tema = ls.get('tema', 'premium'); if (!['escuro', 'basico', 'premium', 'super'].includes(S.tema)) S.tema = 'premium';   // tema do mapa, lembrado neste computador   // "Ajustar à tela" fica lembrado neste computador
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const brl = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const brlC = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -300,6 +384,7 @@ window.addEventListener('resize', () => { if (S.ajuste) ajustarMapa(); });
 document.addEventListener('fullscreenchange', () => setTimeout(ajustarMapa, 150));
 function ligar(app) {
   app.querySelectorAll('[data-area]').forEach(b => b.onclick = () => { S.area = b.dataset.area; ls.set('area', S.area); render(); });
+  app.querySelectorAll('[data-tema]').forEach(b => b.onclick = () => { S.tema = b.dataset.tema; ls.set('tema', S.tema); render(); });
   document.getElementById('bAjuste').onclick = () => { S.ajuste = !S.ajuste; ls.set('ajuste', S.ajuste); render(); };
   requestAnimationFrame(ajustarMapa);
   document.getElementById('bTela').onclick = () => {
@@ -338,10 +423,18 @@ window.addEventListener('popstate', ev => { S.pilha.pop(); abrir(ev.state && ev.
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.ver) voltarVer(); });
 
 /* ----- mapa de faróis por parte (modelo da planilha) ----- */
-const ICF = f => f === 'vd' ? `<svg viewBox="0 0 40 40" aria-label="Bom"><circle cx="20" cy="20" r="17" fill="#c8ecc9" stroke="#3aa04a" stroke-width="2.5"/><path d="M11 21 l6 6 l12 -13" fill="none" stroke="#2e8b3d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-  : f === 'am' ? `<svg viewBox="0 0 40 40" aria-label="Atenção"><circle cx="20" cy="20" r="17" fill="#fde7a6" stroke="#e0a100" stroke-width="2.5"/><path d="M20 10 v13" stroke="#b07a00" stroke-width="4.5" stroke-linecap="round"/><circle cx="20" cy="29" r="2.8" fill="#b07a00"/></svg>`
-  : f === 'na' ? `<svg viewBox="0 0 40 40" aria-label="Não se aplica"><circle cx="20" cy="20" r="17" fill="#cfe2fb" stroke="#1f6fd6" stroke-width="2.5"/><text x="20" y="25" text-anchor="middle" font-size="12" font-weight="900" fill="#1557b0" font-family="system-ui,Arial,sans-serif">N/A</text></svg>`
-  : f === 'vm' ? `<svg viewBox="0 0 40 40" aria-label="Crítico"><circle cx="20" cy="20" r="17" fill="#f6c3c0" stroke="#d93025" stroke-width="2.5"/><path d="M13 13 l14 14 M27 13 l-14 14" stroke="#c62828" stroke-width="4.5" stroke-linecap="round"/></svg>` : '<span class="vaz">—</span>';
+const ICF = f => f === 'vd' ? `<svg class="fi vd" viewBox="0 0 40 40" aria-label="Bom"><circle class="b" cx="20" cy="20" r="17" fill="#c8ecc9" stroke="#3aa04a" stroke-width="2.5"/><path class="g" d="M11 21 l6 6 l12 -13" fill="none" stroke="#2e8b3d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  : f === 'am' ? `<svg class="fi am" viewBox="0 0 40 40" aria-label="Atenção"><circle class="b" cx="20" cy="20" r="17" fill="#fde7a6" stroke="#e0a100" stroke-width="2.5"/><path class="g" d="M20 10 v13" stroke="#b07a00" stroke-width="4.5" stroke-linecap="round"/><circle class="gd" cx="20" cy="29" r="2.8" fill="#b07a00"/></svg>`
+  : f === 'na' ? `<svg class="fi na" viewBox="0 0 40 40" aria-label="Não se aplica"><circle class="b" cx="20" cy="20" r="17" fill="#cfe2fb" stroke="#1f6fd6" stroke-width="2.5"/><text class="gt" x="20" y="25" text-anchor="middle" font-size="12" font-weight="900" fill="#1557b0" font-family="system-ui,Arial,sans-serif">N/A</text></svg>`
+  : f === 'vm' ? `<svg class="fi vm" viewBox="0 0 40 40" aria-label="Crítico"><circle class="b" cx="20" cy="20" r="17" fill="#f6c3c0" stroke="#d93025" stroke-width="2.5"/><path class="g" d="M13 13 l14 14 M27 13 l-14 14" stroke="#c62828" stroke-width="4.5" stroke-linecap="round"/></svg>` : '<span class="vaz">—</span>';
+/* temas do mapa */
+const TEMAS = [['escuro', 'Escuro'], ['basico', 'Básico'], ['premium', 'Premium'], ['super', 'Super premium']];
+const DEFS_SUPER = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="spvd" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#d8ffe6"/><stop offset=".38" stop-color="#36e07e"/><stop offset="1" stop-color="#0a6a34"/></radialGradient>
+  <radialGradient id="spam" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#fff6cf"/><stop offset=".38" stop-color="#ffc629"/><stop offset="1" stop-color="#9a6400"/></radialGradient>
+  <radialGradient id="spvm" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#ffd9d6"/><stop offset=".38" stop-color="#ff4a3d"/><stop offset="1" stop-color="#8e1209"/></radialGradient>
+  <radialGradient id="spna" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#dcebff"/><stop offset=".38" stop-color="#4c94ff"/><stop offset="1" stop-color="#123f92"/></radialGradient>
+</defs></svg>`;
 function vMapa(C) {
   const ids = C.insp.map(i => i.id).filter(id => C.I[id]).sort((a, b) => cmp(C.I[a].nome, C.I[b].nome));
   const sel = S.mapaInsp && ids.includes(S.mapaInsp) ? [S.mapaInsp] : ids;
@@ -349,19 +442,20 @@ function vMapa(C) {
   const grupos = sel.map(id => ({ i: C.I[id], eqs: C.eqs.filter(x => x.e.inspId === id).map(x => x.e).sort((a, b) => cmp(a.nome, b.nome)) })).filter(g => g.eqs.length);
   const todos = grupos.reduce((l, g) => l.concat(g.eqs.map((e, j) => ({ e, ini: j === 0 }))), []);
   const ini = j => todos[j].ini ? ' ini' : '';
-  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"></th>${grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}">${esc(g.i.nome.toUpperCase())}</th>`).join('')}</tr>
-    <tr>${grupos.map(g => `<th class="sub ini" colspan="${g.eqs.length}">${g.eqs.length > 2 ? 'TRANSPORTADORES' : 'TRANSP.'}</th>`).join('')}</tr>
+  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>Partes</b><span>${todos.length} equipamentos</span></div></th>${grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}"><span class="nm">${esc(g.i.nome)}</span></th>`).join('')}</tr>
+    <tr>${grupos.map(g => `<th class="sub ini" colspan="${g.eqs.length}">${g.eqs.length} ${g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
     <tr>${todos.map((x, j) => `<th class="${ini(j)}"><div class="eqn">${esc(x.e.nome)}</div></th>`).join('')}</tr>`;
   const linhas = MAPA.map((m, j) => {
     const grp = m.g === 'Correia' ? (MAPA[j - 1] && MAPA[j - 1].g === 'Correia' ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === 'Correia').length}">CORREIA</td>`) : '';
     const nome = m.g === 'Correia' ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
     return `<tr><td class="n fx">${m.n}</td>${nome}${todos.map((x, k) => { const p = (x.e.partes || {})[m.k]; return `<td class="cel${ini(k)}" data-cel="${esc(x.e.id)}|${m.k}" title="${esc(x.e.nome)} · ${esc(m.nome)}">${ICF(p ? p.f : '')}</td>`; }).join('')}</tr>`;
   }).join('');
-  const blocos = todos.length ? `<div class="mapa"><table><thead>${cab}</thead><tbody>${linhas}</tbody></table></div>` : '';
+  const blocos = todos.length ? `<div class="mapa">${DEFS_SUPER}<table><thead>${cab}</thead><tbody>${linhas}</tbody></table></div>` : '';
   return `<section class="det"><div class="f"><h2>Mapa de faróis</h2><div class="m">Farol de cada parte do transportador, marcado pelo inspetor na inspeção · clique numa célula para ver quem avaliou e quando</div></div></section>
-  <div class="mapa-ctl"><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
+  <div class="mapawrap t-${S.tema}">
+  <div class="mapa-ctl"><div class="temas"><span>Tema</span><div class="seg">${TEMAS.map(([k, n]) => `<button class="${S.tema === k ? 'on' : ''}" data-tema="${k}">${n}</button>`).join('')}</div></div><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
     <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span></div></div>
-  ${blocos || '<section class="pn"><div class="vazio">Nenhum equipamento para mostrar.</div></section>'}`;
+  ${blocos || '<section class="pn"><div class="vazio">Nenhum equipamento para mostrar.</div></section>'}</div>`;
 }
 function popCelula(C, eid, k) {
   const e = C.d.equip.find(x => x.id === eid); if (!e) return;
