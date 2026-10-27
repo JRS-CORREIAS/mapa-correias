@@ -371,7 +371,7 @@ function render() {
   }
   const C = calcular(), G = C.G, agora = new Date();
   const areaTxt = S.area === 'todas' ? 'Pátios e CC7' : AREAS[S.area];
-  const cab = `<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Mapa de faróis · ${esc(areaTxt)}</p></div></div>
+  const cab = `<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
     <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
     <button class="ic" id="bTela">Tela cheia</button>
