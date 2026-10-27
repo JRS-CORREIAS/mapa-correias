@@ -103,6 +103,12 @@ tr.click:hover td{background:#17293a}
 .eqd .cab .f{flex:1;min-width:220px}
 .mini{display:flex;gap:18px;flex-wrap:wrap;font-size:14.5px;color:var(--mut)}
 .mini b{color:var(--tx);font-size:18px}
+.ic.on{background:var(--az);color:#06121c}
+body.ajuste .det,body.ajuste .rod{display:none}
+body.ajuste .wrap{padding-top:10px;padding-bottom:6px}
+body.ajuste header{margin-bottom:10px}
+body.ajuste .mapa-ctl{margin-bottom:8px}
+body.ajuste .mapa{margin-bottom:0;padding-top:8px;padding-bottom:8px}
 .mapa-ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .mapa-ctl select{background:var(--p1);border:1px solid var(--ln);color:var(--tx);border-radius:12px;padding:10px 14px;font:inherit;font-weight:600}
 .leg{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font-size:14px}
@@ -156,6 +162,7 @@ const PARTE = {}; PARTES.forEach(p => { PARTE[p.k] = p; });
 const LS = 'mc.mapa.';
 const ls = { get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } } };
 const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('codigo', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
+S.ajuste = ls.get('ajuste', false);   // "Ajustar à tela" fica lembrado neste computador
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const brl = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const brlC = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -229,6 +236,7 @@ function render() {
   const areaTxt = S.area === 'todas' ? 'Pátios e CC7' : AREAS[S.area];
   const cab = `<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Mapa de faróis · ${esc(areaTxt)}</p></div></div>
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
+    <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
     <button class="ic" id="bTela">Tela cheia</button>
     <div class="hora"><b id="relogio">${p2(agora.getHours())}:${p2(agora.getMinutes())}</b>${fData(Date.now())}</div></header>
   ${S.erro ? `<div class="aviso">${esc(S.erro)}</div>` : ''}`;
@@ -271,8 +279,29 @@ function render() {
   </div>`;
   ligar(app);
 }
+/* "Ajustar à tela": encaixa a tabela inteira do mapa na largura e na altura da janela, sem rolar.
+   Recalcula ao redimensionar, ao entrar ou sair da tela cheia e a cada atualização. */
+function ajustarMapa() {
+  document.body.classList.toggle('ajuste', !!S.ajuste);
+  const box = document.querySelector('.mapa'), t = box && box.querySelector('table');
+  if (!t) return;
+  t.style.zoom = '';
+  if (!S.ajuste) { box.style.overflowX = ''; return; }
+  box.style.overflowX = 'hidden';
+  const cs = getComputedStyle(box);
+  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+  const h = window.innerHeight - box.getBoundingClientRect().top - window.scrollY - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 14;
+  const nw = t.offsetWidth, nh = t.offsetHeight;
+  if (!nw || !nh) return;
+  const z = Math.max(.25, Math.min(w / nw, h / nh, 2.5));
+  t.style.zoom = z.toFixed(3);
+}
+window.addEventListener('resize', () => { if (S.ajuste) ajustarMapa(); });
+document.addEventListener('fullscreenchange', () => setTimeout(ajustarMapa, 150));
 function ligar(app) {
   app.querySelectorAll('[data-area]').forEach(b => b.onclick = () => { S.area = b.dataset.area; ls.set('area', S.area); render(); });
+  document.getElementById('bAjuste').onclick = () => { S.ajuste = !S.ajuste; ls.set('ajuste', S.ajuste); render(); };
+  requestAnimationFrame(ajustarMapa);
   document.getElementById('bTela').onclick = () => {
     const d = document;
     try { if (d.fullscreenElement) d.exitFullscreen(); else d.documentElement.requestFullscreen().catch(() => { }); } catch (e) { }
