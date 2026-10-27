@@ -130,6 +130,7 @@ label.l:first-child{margin-top:0}
 .ckl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ln)}
 .ckl .f{flex:1 1 200px;font-size:15px}
 .ckb{display:flex;gap:6px}
+.idade{font-size:12.5px;font-weight:700;margin-top:3px;color:var(--mut)}.idade.am{color:#b07a00}.idade.vm{color:var(--vm)}.idade.nv{color:#8a97a5;font-style:italic}
 .mini-far{display:flex;gap:2px;margin-top:6px}.mini-far i{flex:1;height:7px;border-radius:2px;background:#d9dfe5}.mini-far i.vd{background:var(--vd)}.mini-far i.am{background:var(--am)}.mini-far i.vm{background:var(--vm)}.mini-far i.na{background:#1f6fd6}
 .ncc{flex:1 1 100%;background:#fdecea;border-radius:10px;padding:8px 10px 10px;margin-top:2px}
 .ncc .l{margin-top:0;color:var(--vm)}
@@ -2308,6 +2309,10 @@ async function enviarEmails() { }
 try { ls.del('emailFila'); } catch (e) { }
 
 /* ===== VERSÃO SÓ FARÓIS: telas que substituem as de rolos, listas e indicadores ===== */
+/* há quanto tempo foi a última inspeção: até 15 dias normal, 16 a 30 amarelo, mais de 30 vermelho */
+const diasDesde = ms => Math.max(0, Math.floor((Date.now() - ms) / 864e5));
+const idadeDias = ms => { const d = diasDesde(ms); return d === 0 ? 'menos de 1 dia' : d === 1 ? '1 dia' : d + ' dias'; };
+const idadeCls = ms => !ms ? 'nv' : diasDesde(ms) > 30 ? 'vm' : diasDesde(ms) > 15 ? 'am' : 'ok';
 const contFar = l => { const n = { vd: 0, am: 0, vm: 0, x: 0 }; l.forEach(e => { n[FAROL[e.farol] ? e.farol : 'x']++; }); return n; };
 const partesAval = e => Object.values(e.partes || {}).filter(x => x && x.f).length;
 function linhaEquipFarol(D, e, acao) {
@@ -2315,7 +2320,8 @@ function linhaEquipFarol(D, e, acao) {
   const nc = Object.values(P).reduce((a, x) => a + Object.values((x && x.ck) || {}).filter(v => v === 'nc').length, 0);
   const ult = Object.values(P).reduce((m, x) => Math.max(m, (x && x.em) || 0), 0);
   return `<div class="li tap" data-a="${acao}" data-id="${e.id}">${semaforo(e.farol)}<div class="f"><b>${esc(e.nome)}</b>
-    <div class="mut sm">${esc(e.area || '')}${e.area ? ' · ' : ''}${n} de ${MAPA.length} partes avaliadas${ult ? ' · ' + fData(ult) : ''}</div>
+    <div class="mut sm">${esc(e.area || '')}${e.area ? ' · ' : ''}${n} de ${MAPA.length} partes avaliadas</div>
+    <div class="idade ${idadeCls(ult)}">${ult ? 'Última inspeção há ' + idadeDias(ult) + ' · ' + fData(ult) : 'Nunca inspecionado'}</div>
     <div class="mini-far">${MAPA.map(m => { const f = P[m.k] && P[m.k].f; return `<i class="${f || ''}" title="${esc(m.nome)}"></i>`; }).join('')}</div></div>
     <div style="text-align:right">${e.farol ? `<span class="chip ${e.farol}">${FAROL[e.farol].n}</span>` : '<span class="chip az">Sem avaliação</span>'}</div></div>`;
 }

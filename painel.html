@@ -105,6 +105,21 @@ tr.click:hover td{background:#17293a}
 .mini b{color:var(--tx);font-size:18px}
 .ic.on{background:var(--az);color:#06121c}
 body.ajuste .det,body.ajuste .rod{display:none}
+/* idade da última inspeção (nome do equipamento) */
+.mapa .dias{font-size:10.5px;font-weight:800;text-align:center;margin:4px auto 2px;padding:1px 4px;border-radius:6px;white-space:nowrap;opacity:.75}
+.mapawrap .mapa th.idade-am .eqn{color:#d99a00!important}
+.mapawrap .mapa th.idade-vm .eqn{color:#e0352a!important}
+.mapawrap .mapa th.idade-nv .eqn{color:#8a97a5!important;font-style:italic}
+.mapawrap .mapa th.idade-am .dias{background:rgba(240,180,0,.22);color:#c58a00;opacity:1}
+.mapawrap .mapa th.idade-vm .dias{background:rgba(230,50,40,.18);color:#e0352a;opacity:1}
+.mapawrap .mapa th.idade-nv .dias{color:#8a97a5}
+.mapawrap.m-escuro .mapa th.idade-vm .eqn,.mapawrap.m-escuro .mapa th.idade-vm .dias{color:#ff6b5e!important}
+.mapawrap.m-escuro .mapa th.idade-am .eqn,.mapawrap.m-escuro .mapa th.idade-am .dias{color:#ffc93c!important}
+.idleg{margin-top:8px;align-items:center}
+.idleg .pt{width:12px;height:12px;border-radius:3px;display:inline-block}
+.idleg .pt.ok{background:var(--tx);opacity:.75}.idleg .pt.am{background:#e6a800}.idleg .pt.vm{background:#e0352a}.idleg .pt.nv{background:#8a97a5}
+.idleg .venc{color:#e0352a;font-weight:700}
+.mapa-ctl>.leg-blk{display:flex;flex-direction:column}
 /* ===== Mapa de faróis: 3 estilos (básico, premium, super premium) × claro ou escuro ===== */
 .temas{display:flex;align-items:center;gap:8px;margin-right:6px}
 .temas>span{color:var(--mut);font-size:14px}
@@ -489,6 +504,16 @@ const DEFS_SUPER = `<svg width="0" height="0" style="position:absolute" aria-hid
   <radialGradient id="spvm" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#ffd9d6"/><stop offset=".38" stop-color="#ff4a3d"/><stop offset="1" stop-color="#8e1209"/></radialGradient>
   <radialGradient id="spna" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#dcebff"/><stop offset=".38" stop-color="#4c94ff"/><stop offset="1" stop-color="#123f92"/></radialGradient>
 </defs></svg>`;
+/* idade da última inspeção do equipamento (a data mais recente em que alguma parte foi salva) */
+const PRAZO_ALERTA = 15, PRAZO_VENCIDO = 30;   // dias
+function idadeInsp(e) {
+  let em = 0, por = '';
+  Object.values(e.partes || {}).forEach(x => { if (x && x.em > em) { em = x.em; por = x.por; } });
+  if (!em) return { c: 'nv', d: null, txt: 'nunca', tit: () => 'nunca inspecionado' };
+  const d = Math.max(0, Math.floor((Date.now() - em) / 864e5));
+  return { c: d > PRAZO_VENCIDO ? 'vm' : d > PRAZO_ALERTA ? 'am' : 'ok', d, txt: d + 'd',
+    tit: C => 'última inspeção em ' + fData(em) + (C && C.I[por] ? ' por ' + C.I[por].nome : '') + ' (há ' + d + (d === 1 ? ' dia' : ' dias') + ')' };
+}
 function vMapa(C) {
   const ids = C.insp.map(i => i.id).filter(id => C.I[id]).sort((a, b) => cmp(C.I[a].nome, C.I[b].nome));
   const sel = S.mapaInsp && ids.includes(S.mapaInsp) ? [S.mapaInsp] : ids;
@@ -498,7 +523,7 @@ function vMapa(C) {
   const ini = j => todos[j].ini ? ' ini' : '';
   const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>Partes</b><span>${todos.length} equipamentos</span></div></th>${grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}"><span class="nm">${esc(g.i.nome)}</span></th>`).join('')}</tr>
     <tr>${grupos.map(g => `<th class="sub ini" colspan="${g.eqs.length}">${g.eqs.length} ${g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
-    <tr>${todos.map((x, j) => `<th class="${ini(j)}"><div class="eqn">${esc(x.e.nome)}</div></th>`).join('')}</tr>`;
+    <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div><div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
   const linhas = MAPA.map((m, j) => {
     const grp = m.g === 'Correia' ? (MAPA[j - 1] && MAPA[j - 1].g === 'Correia' ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === 'Correia').length}">CORREIA</td>`) : '';
     const nome = m.g === 'Correia' ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
@@ -508,7 +533,8 @@ function vMapa(C) {
   return `<section class="det"><div class="f"><h2>Mapa de faróis</h2><div class="m">Farol de cada parte do transportador, marcado pelo inspetor na inspeção · clique numa célula para ver quem avaliou e quando</div></div></section>
   <div class="mapawrap t-${S.tema} m-${S.modo}">
   <div class="mapa-ctl"><div class="temas modo"><div class="seg">${[['claro', '☀ Claro'], ['escuro', '☾ Escuro']].map(([k, n]) => `<button class="${S.modo === k ? 'on' : ''}" data-modo="${k}">${n}</button>`).join('')}</div></div><div class="temas"><span>Estilo</span><div class="seg">${TEMAS.map(([k, n]) => `<button class="${S.tema === k ? 'on' : ''}" data-tema="${k}">${n}</button>`).join('')}</div></div><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
-    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span></div></div>
+    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span></div>
+    <div class="leg idleg"><b>Última inspeção:</b><span><i class="pt ok"></i>até ${PRAZO_ALERTA} dias</span><span><i class="pt am"></i>${PRAZO_ALERTA + 1} a ${PRAZO_VENCIDO} dias</span><span><i class="pt vm"></i>mais de ${PRAZO_VENCIDO} dias</span><span><i class="pt nv"></i>nunca</span>${(() => { const v = todos.filter(x => ['vm', 'nv'].includes(idadeInsp(x.e).c)).length; return v ? `<span class="venc">⚠ ${v} ${v === 1 ? 'equipamento' : 'equipamentos'} com inspeção vencida ou nunca feita</span>` : ''; })()}</div></div>
   ${blocos || '<section class="pn"><div class="vazio">Nenhum equipamento para mostrar.</div></section>'}</div>`;
 }
 function popCelula(C, eid, k) {
