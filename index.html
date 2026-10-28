@@ -475,7 +475,7 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
-const APP_VERSAO = '2026-10-28 · v12';
+const APP_VERSAO = '2026-10-28 · v13';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -906,6 +906,7 @@ function vListaInsp(D) {
     ${l.length > 8 ? '<input class="in" data-k="busca" placeholder="Procurar nome" style="margin-bottom:6px" aria-label="Procurar inspetor">' : ''}
     ${nG > 1 ? `<div class="dctl"><button class="btn sec peq" data-a="grpTodos" data-v="1">Expandir todas</button><button class="btn sec peq" data-a="grpTodos" data-v="0">Recolher todas</button></div>` : ''}
     ${blocos || `<div class="vazio">Nenhum inspetor de ${esc(AREAS[S.area])} cadastrado ainda. Toque em "Cadastrar inspetor".</div>`}</div>
+  ${S.admin ? '' : `<button class="btn w sec" style="margin:4px 0 12px" data-a="linkPainel">${ICO.ind} Mapa de faróis (web)</button>`}
   ${S.admin ? `<div class="card"><h2>Administração</h2><div class="btns"><button class="btn vd" data-a="linkCadastro">Enviar link do app</button><button class="btn sec" data-a="abrirPlanilha">Abrir planilha</button><button class="btn sec" data-a="fora" data-v="admin">Editar inspetores</button></div><button class="btn w" style="margin-top:8px" data-a="linkPainel">${ICO.ind} Mapa de faróis (notebook)</button></div>` : ''}
   ${S.fila.length ? `<div class="aviso">${S.fila.length} registro(s) guardado(s) neste aparelho, esperando internet para enviar.</div>` : ''}
   <div style="height:8px"></div>${cartaoDev()}`;
@@ -2170,15 +2171,14 @@ const A = {
     } catch (e) { toast('Sem conexão com o servidor.'); }
   },
   async linkPainel() {
-    try {
-      const r = await api({ action: 'links', codigo: S.codigo });
-      if (!r.ok) return toast(msg(r.erro));
-      const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-      const link = base + 'painel.html?s=' + encodeURIComponent(S.srv) + '&e=' + encodeURIComponent(r.codigoEquipe || S.codigo) + '&a=' + S.area;
-      abrirModal('Painel para reuniões', `<p class="mut" style="margin-top:0">Abra este link no notebook (Chrome ou Edge) e projete. O painel mostra todos os indicadores, atualiza sozinho a cada minuto e tem botão de tela cheia. É só para consulta.</p>
-        <textarea class="in" id="txtCopia" readonly style="min-height:96px;font-size:13px">${esc(link)}</textarea>
-        <div class="btns" style="margin-top:10px"><button class="btn sec" data-a="copiarLink">Copiar link</button><a class="btn" href="${esc(link)}" target="_blank" rel="noopener">Abrir painel</a><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent('Painel de indicadores dos rolos: ' + link)}" target="_blank" rel="noopener">${ICO.whats} Enviar</a></div>`);
-    } catch (e) { toast('Sem conexão com o servidor.'); }
+    // qualquer inspetor pode abrir ou mandar o link do Mapa de faróis; o link leva sempre o código da equipe
+    let eq = S.codigo;
+    if (S.admin) { eq = ls.get('codigoEquipe', ''); if (!eq) { try { const r = await api({ action: 'links', codigo: S.codigo }); if (r.ok && r.codigoEquipe) eq = r.codigoEquipe; } catch (e) { } } if (!eq) return toast('Sem conexão com o servidor. Tente de novo com internet.'); }
+    const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+    const link = base + 'painel.html?s=' + encodeURIComponent(S.srv) + '&e=' + encodeURIComponent(eq) + '&a=' + (S.area || 'patios');
+    abrirModal('Mapa de faróis (web)', `<p class="mut" style="margin-top:0">Abra no notebook, na TV da sala ou no próprio celular. Mostra os faróis de todos os equipamentos (Mecânica, Elétrica e Instrumentação) e atualiza sozinho a cada minuto. É só para consulta.</p>
+      <textarea class="in" id="txtCopia" readonly style="min-height:96px;font-size:13px">${esc(link)}</textarea>
+      <div class="btns" style="margin-top:10px"><a class="btn" href="${esc(link)}" target="_blank" rel="noopener">Abrir o mapa</a><button class="btn sec" data-a="copiarLink">Copiar link</button><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent('*Mapa de faróis - Mapa das Correias*\nAbra no Chrome (notebook, TV ou celular): ' + link)}" target="_blank" rel="noopener">${ICO.whats} Enviar</a></div>`);
   },
   copiarLink() { const el = $('#txtCopia'); try { navigator.clipboard.writeText(el.value).then(() => toast('Link copiado.'), () => { el.select(); }); } catch (e) { el.select(); } },
   async abrirPlanilha() {
@@ -2424,6 +2424,7 @@ function vInicio(D) {
   ${S.admin ? `<div class="card devcard"><div class="row"><div class="f"><b>🔧 Modo desenvolvedor</b><div class="mut sm">Pode preencher e editar os equipamentos de todos os inspetores.</div></div></div>
     <div class="btns" style="margin-top:10px"><button class="btn ${V.todos ? 'vd' : 'sec'}" data-a="devTodos">${V.todos ? '✓ Todos os equipamentos' : 'Ver todos os equipamentos'}</button><button class="btn sec" data-a="devDiag">Diagnóstico</button></div></div>` : ''}
   ${S.admin && V.todos ? listaTodos(D) : listaMeus(D, meus)}
+  <button class="btn w sec" style="margin:14px 0 4px" data-a="linkPainel">${ICO.ind} Mapa de faróis (web)</button>
   ${cartaoDev()}`;
 }
 /* lista dos equipamentos da disciplina; na instrumentação, separada em dosadoras e balanças de fluxo */
