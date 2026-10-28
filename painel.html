@@ -298,6 +298,7 @@ body.ajuste .titmini{display:block}
 .t-super.m-claro .fi.vm .b{fill:url(#spvm)}.t-super.m-claro .fi.vm{filter:drop-shadow(0 2px 5px rgba(220,40,30,.5))}
 .t-super.m-claro .fi.na .b{fill:url(#spna)}.t-super.m-claro .fi.na{filter:drop-shadow(0 2px 4px rgba(40,100,230,.45))}
 /* comentário do farol */
+.mapa .tbal.tr{background:rgba(150,160,175,.2);color:#8a97a5}
 .legcm{display:inline-block;width:0;height:0;border-style:solid;border-width:0 11px 11px 0;border-color:transparent #3d8bfd transparent transparent;vertical-align:1px}
 .mapa td.cel{position:relative}
 .mapa td.cel.cm::after{content:"";position:absolute;top:3px;right:3px;width:0;height:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent #3d8bfd transparent transparent;pointer-events:none}
@@ -322,6 +323,8 @@ body.ajuste .titmini{display:block}
 @media (min-width:3600px){header,.mapa-ctl,.det,.rod,.aviso{zoom:2}}
 @media (min-width:2300px){#tipFarol{zoom:1.5}.pop .cx{zoom:1.5}}
 @media (min-width:3600px){#tipFarol{zoom:2}.pop .cx{zoom:2}}
+/* com o ajuste à tela a tabela não estica para preencher a caixa (senão a última coluna encosta na borda e pode cortar) */
+body.ajuste .mapawrap .mapa table{width:max-content}
 /* sem negrito nos nomes dos equipamentos e das partes: letra média, mais limpa de ler */
 .mapawrap .mapa .eqn,.mapawrap .mapa .ptn{font-weight:500!important}
 /* modo foco (tela cheia / apresentação) */
@@ -366,7 +369,7 @@ const MAPA_ELE = [{"k": "e1", "n": 1, "nome": "Motor elétrico", "g": "Acionamen
 const MAPA_BAL = [{"k": "b1", "n": 1, "nome": "Células de carga", "g": "Pesagem"}, {"k": "b2", "n": 2, "nome": "Ponte / estrutura de pesagem", "g": "Pesagem"}, {"k": "b3", "n": 3, "nome": "Rolos de pesagem e alinhamento", "g": "Pesagem"}, {"k": "b4", "n": 4, "nome": "Sensor de velocidade", "g": "Pesagem"}, {"k": "b5", "n": 5, "nome": "Integrador / indicador", "g": "Eletrônica"}, {"k": "b6", "n": 6, "nome": "Cabos, caixa de junção e aterramento", "g": "Eletrônica"}, {"k": "b7", "n": 7, "nome": "Comunicação com o supervisório", "g": "Eletrônica"}, {"k": "b8", "n": 8, "nome": "Zero da balança", "g": "Aferição"}, {"k": "b9", "n": 9, "nome": "Teste com peso padrão / corrente", "g": "Aferição"}, {"k": "b10", "n": 10, "nome": "Validade da calibração", "g": "Aferição"}, {"k": "b11", "n": 11, "nome": "Limpeza e acúmulo de material", "g": ""}, {"k": "b12", "n": 12, "nome": "Motor e redutor", "g": "Dosadora"}, {"k": "b13", "n": 13, "nome": "Inversor de frequência", "g": "Dosadora"}, {"k": "b14", "n": 14, "nome": "Malha de controle (vazão x setpoint)", "g": "Dosadora"}, {"k": "b15", "n": 15, "nome": "Correia da dosadora", "g": "Dosadora"}, {"k": "b17", "n": 16, "nome": "Tensão da correia na pesagem", "g": "Fluxo"}, {"k": "b18", "n": 17, "nome": "Rolos antes e depois da balança", "g": "Fluxo"}];
 /* balanças: só os equipamentos com balança integradora (bal = tem) ou balança dosadora (bal = dos) */
 const ehBal = e => e.bal === 'tem' || e.bal === 'dos';
-const DISC = { mec: { nome: 'Mecânica', titulo: 'Mapa da Mecânica', ico: '⚙', mapa: MAPA_MEC, filtro: e => !e.soEle && !e.soBal }, ele: { nome: 'Elétrica', titulo: 'Mapa da Elétrica', ico: '⚡', mapa: MAPA_ELE, filtro: e => !!e.inspEle, dono: e => e.inspEle }, bal: { nome: 'Instrumentação', titulo: 'Mapa da Instrumentação', ico: '⚖', mapa: MAPA_BAL, filtro: e => !!e.soBal, tipos: true } };
+const DISC = { mec: { nome: 'Mecânica', titulo: 'Mapa da Mecânica', ico: '⚙', mapa: MAPA_MEC, filtro: e => !e.soEle && !e.soBal }, ele: { nome: 'Elétrica', titulo: 'Mapa da Elétrica', ico: '⚡', mapa: MAPA_ELE, filtro: e => !!e.inspEle, dono: e => e.inspEle }, bal: { nome: 'Instrumentação', titulo: 'Mapa da Instrumentação', ico: '⚖', mapa: MAPA_BAL, filtro: e => !!e.soBal || !!e.inspIns, dono: e => e.soBal ? e.inspId : e.inspIns, tipos: true } };
 const LS = 'mc.mapa.';
 const ls = { get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } } };
 const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('codigo', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
@@ -532,20 +535,20 @@ function ajustarMapa() {
   if (!S.ajuste) { box.style.overflowX = ''; return; }
   box.style.overflowX = 'hidden';
   const cs = getComputedStyle(box);
-  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+  // folga de segurança: cada navegador/TV arredonda um pouco diferente (escala do Windows, fonte, barra de rolagem)
+  const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 10;
   const h = window.innerHeight - box.getBoundingClientRect().top - window.scrollY - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (document.body.classList.contains('foco') ? 6 : 14);
   const nw = t.offsetWidth, nh = t.offsetHeight;
   if (!nw || !nh) return;
-  let z = Math.max(.25, Math.min(w / nw, h / nh, 5));   // até 5x: em TV 4K o mapa ocupa a tela toda
-  t.style.zoom = z.toFixed(3);
-  // bordas e arredondamentos não diminuem na mesma proporção: confere o tamanho real e corrige até caber
-  for (let i = 0; i < 4; i++) {
-    const r = t.getBoundingClientRect(), fw = r.width / w, fh = r.height / h, f = Math.max(fw, fh);
-    if (f <= 1.001) break;
-    z = z / f * 0.995; t.style.zoom = z.toFixed(3);
-  }
+  // estimativa proporcional e depois busca o maior zoom que realmente cabe (bordas não escalam na mesma proporção)
+  const cabe = z => { t.style.zoom = z.toFixed(3); const r = t.getBoundingClientRect(); return r.width <= w && r.height <= h; };
+  let hi = Math.max(.25, Math.min(w / nw, h / nh, 5)) * 1.06, lo = .2;
+  if (cabe(hi)) lo = hi; else for (let i = 0; i < 9; i++) { const m = (lo + hi) / 2; if (cabe(m)) lo = m; else hi = m; }
+  t.style.zoom = lo.toFixed(3);
 }
 window.addEventListener('resize', () => { if (S.ajuste) ajustarMapa(); });
+// se a largura da área mudar depois (barra de rolagem, escala do Windows, painel lateral), reajusta
+try { let _lw = 0, _tm; new ResizeObserver(() => { const lw = document.documentElement.clientWidth; if (lw === _lw) return; _lw = lw; clearTimeout(_tm); _tm = setTimeout(() => { if (S.ajuste) ajustarMapa(); }, 120); }).observe(document.documentElement); } catch (e) { }
 // a fonte chega depois da primeira montagem: reajusta quando ela terminar de carregar
 try { document.fonts.ready.then(() => { if (S.ajuste) ajustarMapa(); }); } catch (e) { }
 /* modo foco: em tela cheia ou na apresentação, só os menus essenciais e as legendas */
@@ -646,14 +649,14 @@ function vMapa(C) {
   if (D0.tipos) {
     const tds = grupos.reduce((l, g) => l.concat(g.eqs), []), nomes = [...new Set(grupos.map(g => g.i.nome))].join(', ');
     // um campo único com o nome do inspetor (em cima, ocupando todas as colunas) e, embaixo, os tipos de balança
-    grupos = [['dos', 'Dosadoras'], ['tem', 'Balanças de fluxo']].map(([t, n]) => ({ i: { nome: n }, tipo: true, eqs: tds.filter(e => e.bal === t) })).filter(g => g.eqs.length);
+    grupos = [['dos', 'Dosadoras'], ['tem', 'Balanças de fluxo'], ['tr', 'Transportadores']].map(([t, n]) => ({ i: { nome: n }, tipo: true, tr: t === 'tr', eqs: tds.filter(e => t === 'tr' ? !e.soBal : e.soBal && (e.bal || 'tem') === t) })).filter(g => g.eqs.length);
     grupos.insp = nomes;
   }
   const todos = grupos.reduce((l, g) => l.concat(g.eqs.map((e, j) => ({ e, ini: j === 0 }))), []);
   const ini = j => todos[j].ini ? ' ini' : '';
-  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>${S.disc === 'mec' ? 'Partes' : 'Itens'}</b><span>${todos.length} ${S.disc === 'bal' ? 'balanças' : 'equipamentos'}</span></div></th>${grupos.insp !== undefined ? `<th class="tit ini" colspan="${todos.length}"><span class="nm">${esc(grupos.insp || '—')}</span></th>` : grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}" title="${esc(g.i.nome)}"><span class="nm">${esc(nomeCurto(g.i.nome, g.eqs.length))}</span></th>`).join('')}</tr>
-    <tr>${grupos.map(g => `<th class="sub ini${g.tipo ? ' tipo' : ''}" colspan="${g.eqs.length}">${g.tipo ? esc(g.i.nome) + ' · ' : ''}${g.eqs.length} ${S.disc === 'bal' ? (g.eqs.length === 1 ? 'balança' : 'balanças') : g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
-    <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div>${S.disc === 'bal' ? `<div class="tbal ${x.e.bal}">${x.e.bal === 'dos' ? 'DOS' : 'FLX'}</div>` : ''}<div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
+  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>${S.disc === 'mec' ? 'Partes' : 'Itens'}</b><span>${todos.length} ${S.disc === 'bal' && todos.every(x => x.e.soBal) ? 'balanças' : 'equipamentos'}</span></div></th>${grupos.insp !== undefined ? `<th class="tit ini" colspan="${todos.length}"><span class="nm">${esc(grupos.insp || '—')}</span></th>` : grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}" title="${esc(g.i.nome)}"><span class="nm">${esc(nomeCurto(g.i.nome, g.eqs.length))}</span></th>`).join('')}</tr>
+    <tr>${grupos.map(g => `<th class="sub ini${g.tipo ? ' tipo' : ''}" colspan="${g.eqs.length}">${g.tipo ? esc(g.i.nome) + ' · ' : ''}${g.eqs.length} ${S.disc === 'bal' && !g.tr ? (g.eqs.length === 1 ? 'balança' : 'balanças') : g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
+    <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div>${S.disc === 'bal' ? (x.e.soBal ? `<div class="tbal ${x.e.bal}">${x.e.bal === 'dos' ? 'DOS' : 'FLX'}</div>` : '<div class="tbal tr">TR</div>') : ''}<div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
   const linhas = MAPA.map((m, j) => {
     const grp = m.g ? (MAPA[j - 1] && MAPA[j - 1].g === m.g ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === m.g).length}">${esc(m.g.toUpperCase())}</td>`) : '';
     const nome = m.g ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
