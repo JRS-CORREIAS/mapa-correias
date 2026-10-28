@@ -536,10 +536,18 @@ function ajustarMapa() {
   const h = window.innerHeight - box.getBoundingClientRect().top - window.scrollY - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (document.body.classList.contains('foco') ? 6 : 14);
   const nw = t.offsetWidth, nh = t.offsetHeight;
   if (!nw || !nh) return;
-  const z = Math.max(.25, Math.min(w / nw, h / nh, 5));   // até 5x: em TV 4K o mapa ocupa a tela toda
+  let z = Math.max(.25, Math.min(w / nw, h / nh, 5));   // até 5x: em TV 4K o mapa ocupa a tela toda
   t.style.zoom = z.toFixed(3);
+  // bordas e arredondamentos não diminuem na mesma proporção: confere o tamanho real e corrige até caber
+  for (let i = 0; i < 4; i++) {
+    const r = t.getBoundingClientRect(), fw = r.width / w, fh = r.height / h, f = Math.max(fw, fh);
+    if (f <= 1.001) break;
+    z = z / f * 0.995; t.style.zoom = z.toFixed(3);
+  }
 }
 window.addEventListener('resize', () => { if (S.ajuste) ajustarMapa(); });
+// a fonte chega depois da primeira montagem: reajusta quando ela terminar de carregar
+try { document.fonts.ready.then(() => { if (S.ajuste) ajustarMapa(); }); } catch (e) { }
 /* modo foco: em tela cheia ou na apresentação, só os menus essenciais e as legendas */
 function focoClasse() {
   document.body.classList.toggle('foco', !!(document.fullscreenElement || S.apres));
