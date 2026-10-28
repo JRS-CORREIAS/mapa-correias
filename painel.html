@@ -217,7 +217,7 @@ body.ajuste .mapa{margin-bottom:0;padding-top:8px;padding-bottom:8px}
 .mapa th,.mapa td{border:1px solid #1e1e1e;padding:0;color:#111;border-bottom:1px solid #1e1e1e}
 .mapa .tit{background:#fff;text-align:left;padding:8px 12px;font-size:18px;font-weight:800;border-bottom:2px solid #111}
 .mapa .sub{text-align:right;padding:6px 12px;font-weight:700;font-size:15px}
-.mapa .eqn{writing-mode:sideways-lr;font-weight:700;font-size:20px;font-stretch:80%;letter-spacing:.02em;line-height:1.15;padding:10px 3px;height:160px;white-space:nowrap;text-align:left;margin:0 auto}
+.mapa .eqn{writing-mode:sideways-lr;font-weight:700;font-size:20px;font-stretch:80%;letter-spacing:.02em;line-height:1.1;padding:8px 3px 10px;height:168px;white-space:nowrap;text-align:left;margin:0 auto}
 @supports not (writing-mode:sideways-lr){.mapa .eqn{writing-mode:vertical-rl;transform:rotate(180deg)}}
 .mapa .cin{background:#d9d9d9}
 .mapa .n{width:34px;text-align:center;font-weight:800;font-size:17px}
@@ -505,12 +505,22 @@ function render() {
 }
 /* "Ajustar à tela": encaixa a tabela inteira do mapa na largura e na altura da janela, sem rolar.
    Recalcula ao redimensionar, ao entrar ou sair da tela cheia e a cada atualização. */
+/* nome do equipamento ocupa toda a altura reservada: o maior nome do mapa define o tamanho da letra */
+function encherNomes(t) {
+  const l = [...t.querySelectorAll('.eqn')]; if (!l.length) return;
+  l.forEach(x => { x.style.fontSize = '20px'; x.style.height = 'auto'; });
+  const maior = Math.max(...l.map(x => x.scrollHeight - 20));   // comprimento do texto (sem o espaço de cima e de baixo)
+  const f = Math.max(20, Math.min(23, 20 * 150 / Math.max(1, maior)));   // entre 20 e 23 px (deixa um respiro entre as colunas)
+  const alt = Math.max(168, Math.ceil(maior * f / 20 + 22));                // nomes muito longos ganham mais altura
+  l.forEach(x => { x.style.fontSize = f.toFixed(1) + 'px'; x.style.height = alt + 'px'; });
+}
 function ajustarMapa() {
   document.body.classList.toggle('ajuste', !!S.ajuste);
   focoClasse();
   const box = document.querySelector('.mapa'), t = box && box.querySelector('table');
   if (!t) return;
   t.style.zoom = '';
+  encherNomes(t);
   if (!S.ajuste) { box.style.overflowX = ''; return; }
   box.style.overflowX = 'hidden';
   const cs = getComputedStyle(box);
