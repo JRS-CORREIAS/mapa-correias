@@ -481,7 +481,7 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
-const APP_VERSAO = '2026-10-28 · v14';
+const APP_VERSAO = '2026-10-28 · v15';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -906,7 +906,7 @@ function vListaInsp(D) {
   const eqA = Object.values(D.equip).filter(e => e.ativo !== false && D.insp[e.inspId] && D.insp[e.inspId].area === S.area);
   return `<section class="hero"><div class="marca">Mapa das Correias</div><h2>Faróis dos equipamentos</h2><div class="hs">${esc(AREAD[S.area])} · cada inspetor preenche os faróis dos seus equipamentos</div>
     <div class="hk"><div><b>${nfmt(l.length)}</b><span>Inspetores</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'vm').length)}</b><span><i class="dot vm"></i>Críticos</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'am').length)}</b><span><i class="dot am"></i>Em atenção</span></div></div>
-    <div style="height:16px"></div><button class="opc prim" data-a="fora" data-v="cadastro" style="margin:0"><span class="ic">${ICO.novo}</span><span><b>Cadastrar inspetor</b><small>Primeira vez? Cadastre o seu nome</small></span></button></section>
+    <div style="height:16px"></div><button class="opc prim" data-a="linkPainel" style="margin:0 0 10px"><span class="ic">${ICO.ind}</span><span><b>Mapa de faróis</b><small>Abrir ou enviar o link da página web</small></span></button><button class="opc prim" data-a="fora" data-v="cadastro" style="margin:0"><span class="ic">${ICO.novo}</span><span><b>Cadastrar inspetor</b><small>Primeira vez? Cadastre o seu nome</small></span></button></section>
   <div class="sec-t"><h2>Toque no seu nome</h2></div>
   <div class="card" style="padding-top:6px;padding-bottom:6px">
     ${l.length > 8 ? '<input class="in" data-k="busca" placeholder="Procurar nome" style="margin-bottom:6px" aria-label="Procurar inspetor">' : ''}
