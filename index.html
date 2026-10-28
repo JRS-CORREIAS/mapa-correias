@@ -303,6 +303,10 @@ html,body{font-size:17px;-webkit-font-smoothing:antialiased;-moz-osx-font-smooth
 .li b{font-size:17.5px}
 .idade{font-size:13.5px}
 .mini-far i{height:8px}
+/* modo desenvolvedor */
+.devon{margin-top:12px;text-align:center;font-weight:800;font-size:14px;color:#8a5a00;background:#fff3d1;border-radius:10px;padding:8px}
+.devcard{border:1.5px dashed #d9a520;background:#fffbef}
+.devbox{margin-top:14px;border:1.5px dashed #d9a520;background:#fffbef;border-radius:12px;padding:10px 12px}
 /* disciplinas */
 .dgrp{display:flex;align-items:center;gap:10px;margin:14px 0 2px;padding:10px 4px 8px;border-bottom:2px solid var(--ln);cursor:pointer;list-style:none;user-select:none}
 .dgrp::-webkit-details-marker{display:none}
@@ -471,6 +475,7 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
+const APP_VERSAO = '2026-10-27 · v11';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -808,7 +813,7 @@ function render(bg) {
   _pend = false;
   navRegistrar();
   // disciplina aberta: a da inspeção em andamento ou a escolhida pelo inspetor (só as que ele tem)
-  if (S.eu) { const ds = discsDo(dados(), S.eu.id); if (V.insp && V.insp.disc) S.disc = V.insp.disc; else if (!ds.includes(S.disc)) S.disc = ds.includes(ls.get('disc.' + S.eu.id, '')) ? ls.get('disc.' + S.eu.id, '') : (ds[0] || 'mec'); }
+  if (S.eu) { const ds = S.admin ? Object.keys(DISC) : discsDo(dados(), S.eu.id); if (V.insp && V.insp.disc) S.disc = V.insp.disc; else if (!ds.includes(S.disc)) S.disc = ds.includes(ls.get('disc.' + S.eu.id, '')) ? ls.get('disc.' + S.eu.id, '') : (ds[0] || 'mec'); }
   MAPA = (DISC[S.disc] || DISC.mec).mapa;
   const app = $('#app');
   if (!S.srv) app.innerHTML = vConectar();
@@ -841,7 +846,8 @@ function statusTxt() {
 function cartaoDev() {
   const txt = encodeURIComponent('Olá, Jeferson! Estou usando o app Mapa das Correias e gostaria de falar sobre ele.');
   return `<section class="dev"><div class="row"><span class="av">${esc(iniciais(DEV.nome))}</span><div class="f"><div class="dk">Desenvolvido por</div><b>${esc(DEV.nome)}</b><div class="mut sm">${esc(DEV.cargo)}</div><div class="mut sm">${esc(DEV.area)}</div></div></div>
-    <a class="btn wa w" href="https://wa.me/${DEV.whats}?text=${txt}" target="_blank" rel="noopener noreferrer">${ICO.whats} Falar com o desenvolvedor</a></section>`;
+    <a class="btn wa w" href="https://wa.me/${DEV.whats}?text=${txt}" target="_blank" rel="noopener noreferrer">${ICO.whats} Falar com o desenvolvedor</a>
+    ${!S.eu ? (S.admin ? `<div class="devon">🔧 Modo desenvolvedor ligado</div><div class="btns" style="margin-top:8px"><button class="btn sec" data-a="devDiag">Diagnóstico</button><button class="btn lin" data-a="devSair">Sair do modo desenvolvedor</button></div>` : `<button class="btn lin w" style="margin-top:8px" data-a="devEntrar">🔧 Modo desenvolvedor</button>`) : ''}</section>`;
 }
 function vArea() {
   const D = S.base || {}, I = Object.values(D.insp || {}).filter(i => i.ativo);
@@ -1914,6 +1920,17 @@ function selTipo(D, cat, nome, v) {
   const l = tiposCat(D, cat);
   return `<select class="in" name="${nome}"><option value="">Não definido</option>${l.map(t => `<option value="${t.id}" ${t.id === v ? 'selected' : ''}>${esc(tipoTxt(t))}</option>`).join('')}</select>`;
 }
+/* modo desenvolvedor: tipo do equipamento e inspetores de cada disciplina */
+function devCamposEquip(D, e, id) {
+  const tipo = e.soBal ? (e.bal === 'dos' ? 'dos' : 'tem') : e.soEle ? 'ele' : id ? 'tr' : (S.disc === 'bal' ? 'tem' : S.disc === 'ele' ? 'ele' : 'tr');
+  const ins = Object.values(D.insp).filter(i => i.ativo).sort((a, b) => cmpTxt(a.nome, b.nome));
+  const op = (sel, vazio) => (vazio ? `<option value="">${vazio}</option>` : '') + ins.map(i => `<option value="${esc(i.id)}" ${sel === i.id ? 'selected' : ''}>${esc(i.nome)}</option>`).join('');
+  const dono = id ? e.inspId : (S.disc === 'ele' ? '' : S.eu.id);
+  return `<div class="devbox"><b>🔧 Modo desenvolvedor</b>
+    <label class="l">Tipo</label><select class="in" name="dtipo">${[['tr', 'Transportador (mecânica)'], ['ele', 'Só da elétrica'], ['dos', 'Balança dosadora'], ['tem', 'Balança de fluxo']].map(([k, n]) => `<option value="${k}" ${tipo === k ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    <label class="l">Inspetor da mecânica / instrumentação</label><select class="in" name="dinsp">${op(dono || S.eu.id)}</select>
+    <label class="l">Inspetor da elétrica</label><select class="in" name="dele">${op(e.inspEle || (!id && S.disc === 'ele' ? S.eu.id : ''), 'Nenhum')}</select></div>`;
+}
 function mEquip(id, paraInsp) {
   const D = dados(), e = id ? D.equip[id] : {};
   abrirModal(id ? 'Editar equipamento' : 'Novo equipamento', `<form data-f="equip" data-id="${id || ''}" data-insp="${paraInsp ? 1 : ''}">
@@ -1936,6 +1953,7 @@ function mEquip(id, paraInsp) {
     <div data-ds ${ehDos(e) ? '' : 'hidden'}><label class="l">Quantidade de rolos de carga da balança</label><input class="in" name="ncar" inputmode="numeric" value="${esc(ehDos(e) ? e.ncav || '' : '')}">
     <div class="dica">Sem contar os 3 rolos de pesagem (P1, P2 e P3). Na inspeção, o inspetor digita o número do rolo de carga.</div></div>
     </div>
+    ${S.admin ? devCamposEquip(D, e, id) : ''}
     <div class="erro" id="fe" style="display:none"></div>
     <button class="btn w" style="margin-top:14px">Salvar</button>
     ${id && e.ativo !== false ? `<button type="button" class="btn w lin" style="margin-top:8px" data-a="arquivarEquip" data-id="${id}">Arquivar equipamento</button>` : ''}
@@ -2310,8 +2328,9 @@ const FORM = {
     } catch (e) { erroForm('Sem conexão com o servidor.'); }
   },
   equip(f) {
-    const D = dados(), id = f.dataset.id, bal = f.bal.value, dos = bal === 'dos', nome = f.nome.value.trim();
-    const ncav = Number(dos ? f.ncar.value : f.ncav.value), nret = dos ? 0 : Number(f.nret.value);
+    const D = dados(), id = f.dataset.id, tipo = f.dtipo ? f.dtipo.value : '', nome = f.nome.value.trim();
+    const bal = tipo ? (tipo === 'dos' || tipo === 'tem' ? tipo : '') : f.bal.value, dos = bal === 'dos';
+    const ncav = Number(dos ? (f.ncar.value || (id && D.equip[id].ncav) || 12) : (f.ncav.value || 1)), nret = dos ? 0 : Number(f.nret.value || 0);
     if (!nome) return erroForm(msg('nome-equip'));
     if (!Number.isInteger(ncav) || ncav < 1) return erroForm(dos ? 'Informe a quantidade de rolos de carga da balança.' : msg('ncav'));
     if (!dos && (!Number.isInteger(nret) || nret < 0)) return erroForm(msg('nret'));
@@ -2322,6 +2341,8 @@ const FORM = {
       if (maior > ncav) return erroForm(dos ? 'Há rolo de carga nº ' + maior + ' marcado. A quantidade não pode ser menor.' : 'Há item marcado no cavalete ' + maior + '. A quantidade não pode ser menor.');
     }
     const d = { nome, area: f.area.value.trim(), bal, ncav, nret, tcar: f.tcar.value.trim(), tret: dos ? '' : f.tret.value.trim(), tlim: dos ? '' : f.tlim.value.trim() };
+    if (tipo) Object.assign(d, { inspId: f.dinsp.value, inspEle: f.dele.value, soEle: tipo === 'ele', soBal: tipo === 'dos' || tipo === 'tem' });   // modo desenvolvedor
+    else if (!id && S.disc === 'bal') Object.assign(d, { soBal: true, bal: d.bal || 'tem' });
     if (id) enfileirar([{ c: 'equip', t: 'update', id, d }]);
     else {
       const nid = uid();
@@ -2390,20 +2411,71 @@ function vInicio(D) {
     <p class="obj">${DISC[S.disc].txt} Cada farol salvo vai direto para o <b>Mapa ${S.disc === 'mec' ? 'da Mecânica' : S.disc === 'ele' ? 'da Elétrica' : 'da Instrumentação'}</b>.</p>
     <div class="hk"><div><b>${nfmt(n.vm)}</b><span><i class="dot vm"></i>Críticos</span></div><div><b>${nfmt(n.am)}</b><span><i class="dot am"></i>Em atenção</span></div><div><b>${nfmt(n.vd)}</b><span><i class="dot vd"></i>Bons</span><i>${n.x ? n.x + ' sem avaliação' : ''}</i></div></div>
     <button class="btn cl w" data-a="tela" data-v="insp">${ICO.insp} ${V.insp ? 'Continuar · ' + esc((D.equip[V.insp.equipId] || {}).nome || '') : 'Preencher faróis'}</button></section>
-  ${listaMeus(D, meus)}
+  ${S.admin ? `<div class="card devcard"><div class="row"><div class="f"><b>🔧 Modo desenvolvedor</b><div class="mut sm">Pode preencher e editar os equipamentos de todos os inspetores.</div></div></div>
+    <div class="btns" style="margin-top:10px"><button class="btn ${V.todos ? 'vd' : 'sec'}" data-a="devTodos">${V.todos ? '✓ Todos os equipamentos' : 'Ver todos os equipamentos'}</button><button class="btn sec" data-a="devDiag">Diagnóstico</button></div></div>` : ''}
+  ${S.admin && V.todos ? listaTodos(D) : listaMeus(D, meus)}
   ${cartaoDev()}`;
 }
 /* lista dos equipamentos da disciplina; na instrumentação, separada em dosadoras e balanças de fluxo */
 function listaMeus(D, meus) {
   const vazio = `<div class="vazio">Você ainda não tem equipamentos ${S.disc === 'ele' ? 'na elétrica' : ''}.${S.disc === 'ele' ? '' : '<br><br><button class="btn" data-a="novoEquip">Cadastrar equipamento</button>'}</div>`;
-  const novo = S.disc === 'ele' ? '' : '<button class="btn sec peq" data-a="novoEquip">+ Novo</button>';
+  const novo = S.disc === 'ele' && !S.admin ? '' : '<button class="btn sec peq" data-a="novoEquip">+ Novo</button>';
   if (S.disc === 'bal') return [['dos', 'Dosadoras'], ['tem', 'Balanças de fluxo']].map(([t, n], j) => { const l = meus.filter(e => (e.bal || 'tem') === t); return l.length ? `<div class="sec-t"><h2>${n} <span class="mut" style="font-weight:600">· ${l.length}</span></h2>${j ? '' : novo}</div><div class="card">${l.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('')}</div>` : ''; }).join('') || `<div class="sec-t"><h2>Minhas balanças</h2>${novo}</div><div class="card">${vazio}</div>`;
   return `<div class="sec-t"><h2>${S.disc === 'mec' ? 'Meus equipamentos' : 'Meus equipamentos da elétrica'} <span class="mut" style="font-weight:600">· ${meus.length}</span></h2>${novo}</div>
   <div class="card">${meus.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('') || vazio}</div>`;
 }
+/* modo desenvolvedor: todos os equipamentos da disciplina, separados por inspetor */
+const DONO = { mec: e => !e.soEle && !e.soBal ? e.inspId : '', ele: e => e.inspEle || '', bal: e => e.soBal ? e.inspId : '' };
+function listaTodos(D) {
+  const g = {};
+  // na elétrica entram também os transportadores ainda sem inspetor da elétrica, para o desenvolvedor distribuir
+  const entra = { mec: e => !e.soEle && !e.soBal, ele: e => !e.soBal, bal: e => !!e.soBal }[S.disc];
+  Object.values(D.equip).filter(e => e.ativo !== false && entra(e)).forEach(e => { const k = DONO[S.disc](e); (g[k] = g[k] || []).push(e); });
+  const ks = Object.keys(g).sort((a, b) => cmpTxt(nomeInsp(D, a) || 'zz', nomeInsp(D, b) || 'zz'));
+  return `<div class="sec-t"><h2>Todos · ${DISC[S.disc].nome}</h2><button class="btn sec peq" data-a="novoEquip">+ Novo</button></div>` + ks.map(k => `<div class="sec-t" style="margin-top:6px"><h3 style="margin:0">${esc(k ? nomeInsp(D, k) : S.disc === 'ele' ? 'Sem inspetor da elétrica' : 'Sem inspetor')} <span class="mut" style="font-weight:600">· ${g[k].length}</span></h3></div>
+    <div class="card">${g[k].sort((a, b) => cmpTxt(a.nome, b.nome)).map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('')}</div>`).join('');
+}
+A.devTodos = () => { V.todos = !V.todos; render(); };
+A.devEntrar = () => {
+  abrirModal('Modo desenvolvedor', `<form data-f="devSenha"><p class="mut" style="margin-top:0">Digite a senha do desenvolvedor (o código de administrador do servidor).</p>
+    <input class="in" name="senha" type="password" autocomplete="current-password" required autofocus>
+    <div class="erro" id="fe" style="display:none"></div>
+    <button class="btn w" style="margin-top:12px">Entrar</button></form>`);
+  setTimeout(() => { const i = document.querySelector('#caixa [name=senha]'); if (i) i.focus(); }, 50);
+};
+FORM.devSenha = async f => {
+  const senha = f.senha.value.trim(); if (!senha) return;
+  const b = f.querySelector('button'); b.disabled = true; b.textContent = 'Conferindo...';
+  try {
+    const r = await api({ action: 'sync', codigo: senha });
+    if (!r.ok || !r.admin) { b.disabled = false; b.textContent = 'Entrar'; return erroForm('Senha incorreta.'); }
+    if (!S.admin) ls.set('codigoEquipe', S.codigo);   // guarda o código da equipe para voltar depois
+    S.codigo = senha; ls.set('codigo', senha); receber(r); fecharModal(); render(); toast('Modo desenvolvedor ligado.');
+  } catch (e) { b.disabled = false; b.textContent = 'Entrar'; erroForm('Sem conexão com o servidor. Tente de novo com internet.'); }
+};
+A.devSair = () => confirmar('Sair do modo desenvolvedor', 'O aparelho volta a usar o código da equipe, como os inspetores.', async () => {
+  let eq = ls.get('codigoEquipe', '');
+  if (!eq) { try { const r = await api({ action: 'links', codigo: S.codigo }); if (r.ok) eq = r.codigoEquipe || ''; } catch (e) { } }
+  if (!eq) { toast('Sem conexão com o servidor. Tente de novo com internet.'); return; }
+  S.codigo = eq; ls.set('codigo', eq); ls.del('codigoEquipe'); S.admin = false; ls.set('admin', false); V.todos = false; render(); sincronizar(true); toast('Modo desenvolvedor desligado.');
+}, 'Sair');
+A.devDiag = () => {
+  const D = dados(), n = k => Object.keys(D[k] || {}).length, srv = S.srv ? S.srv.replace(/(\/s\/.{6}).*(.{6}\/exec)$/, '$1…$2') : '-';
+  const lin = (a, b) => `<div class="li" style="padding:9px 0"><div class="f mut sm">${a}</div><b style="text-align:right">${b}</b></div>`;
+  abrirModal('Diagnóstico do app', `${lin('Versão do app', esc(APP_VERSAO))}${lin('Servidor', esc(srv))}${lin('Conexão', S.online ? '✅ online' : '⚠ sem internet')}
+    ${lin('Última sincronização', S.sync ? fData(S.sync) + ' ' + new Date(S.sync).toTimeString().slice(0, 5) : '-')}${lin('Registros esperando envio', S.fila.length)}
+    ${lin('Área', esc(AREAS[S.area] || '-'))}${lin('Inspetor neste aparelho', esc(S.eu ? S.eu.nome : '-'))}${lin('Inspetores / equipamentos', n('insp') + ' / ' + n('equip'))}
+    <div class="btns" style="margin-top:12px"><button class="btn" data-a="devSync">Sincronizar agora</button><button class="btn lin" data-a="devLimpar">Limpar dados do aparelho</button></div>
+    <div class="dica">Limpar apaga só a memória deste aparelho (inspeção em andamento e cópia dos dados). O que já foi enviado continua na planilha.</div>`);
+};
+A.devSync = () => { fecharModal(); sincronizar(); toast('Sincronizando...'); };
+A.devLimpar = () => confirmar('Limpar dados do aparelho', S.fila.length ? 'Atenção: há ' + S.fila.length + ' registro(s) ainda não enviados, eles serão perdidos.' : 'Apaga a memória deste aparelho. Os dados da planilha não são afetados.', () => {
+  try { Object.keys(localStorage).filter(k => k.indexOf(LS) === 0 && !/^mc\.(srv|codigo|codigoEquipe|area|admin)$/.test(k)).forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  location.reload();
+}, 'Limpar', 'vm');
 /* chave de disciplina: só aparece para quem tem equipamentos em mais de uma */
 function chaveDisc(D) {
-  const ds = discsDo(D, S.eu.id);
+  const ds = S.admin ? Object.keys(DISC) : discsDo(D, S.eu.id);
   if (ds.length < 2) return `<div class="dtag">${DISC[S.disc].ico} ${DISC[S.disc].nome}</div>`;
   return `<div class="dseg">${ds.map(d => `<button class="${d === S.disc ? 'on' : ''}" data-a="disc" data-v="${d}">${DISC[d].ico} ${DISC[d].nome}<small>${equipsDisc(D, d, S.eu.id).length}</small></button>`).join('')}</div>`;
 }
@@ -2446,7 +2518,7 @@ function vParte(D, k) {
 /* ao abrir o equipamento: a lista das 19 partes com o farol de cada uma (sem a imagem da correia) */
 function vPartes(D) {
   const I = V.insp, e = D.equip[I.equipId], P = e.partes || {}, feitas = I.feitas || {}, hoje = new Date().toDateString();
-  const n = MAPA.filter(m => P[m.k] && P[m.k].f).length, meu = S.disc !== 'ele' && (e.inspId === S.eu.id || S.admin), un = DISC[S.disc].un, ef = farolD(e);
+  const n = MAPA.filter(m => P[m.k] && P[m.k].f).length, meu = S.admin || (S.disc !== 'ele' && e.inspId === S.eu.id), un = DISC[S.disc].un, ef = farolD(e);
   const linhas = MAPA.map(m => {
     const x = P[m.k], f = x && x.f, k = /^r[345]$/.test(m.k) ? 'rolos' : m.k;
     const agora = feitas[k] || (x && x.em && new Date(x.em).toDateString() === hoje);
