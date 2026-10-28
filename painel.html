@@ -106,7 +106,7 @@ tr.click:hover td{background:#17293a}
 .ic.on{background:var(--az);color:#06121c}
 body.ajuste .det,body.ajuste .rod{display:none}
 /* idade da última inspeção (nome do equipamento) */
-.mapa .dias{font-size:12.5px;font-stretch:90%;font-weight:800;text-align:center;margin:4px auto 2px;padding:1px 4px;border-radius:6px;white-space:nowrap;opacity:.75}
+.mapa .dias{font-size:14px;font-stretch:90%;font-weight:800;text-align:center;margin:4px auto 2px;padding:1px 4px;border-radius:6px;white-space:nowrap;opacity:.75}
 .mapawrap .mapa th.idade-am .eqn{color:#d99a00!important}
 .mapawrap .mapa th.idade-vm .eqn{color:#e0352a!important}
 .mapawrap .mapa th.idade-nv .eqn{color:#8a97a5!important;font-style:italic}
@@ -217,11 +217,11 @@ body.ajuste .mapa{margin-bottom:0;padding-top:8px;padding-bottom:8px}
 .mapa th,.mapa td{border:1px solid #1e1e1e;padding:0;color:#111;border-bottom:1px solid #1e1e1e}
 .mapa .tit{background:#fff;text-align:left;padding:8px 12px;font-size:18px;font-weight:800;border-bottom:2px solid #111}
 .mapa .sub{text-align:right;padding:6px 12px;font-weight:700;font-size:15px}
-.mapa .eqn{writing-mode:sideways-lr;font-weight:700;font-size:17.5px;font-stretch:86%;letter-spacing:.015em;padding:10px 4px;height:150px;white-space:nowrap;text-align:left;margin:0 auto}
+.mapa .eqn{writing-mode:sideways-lr;font-weight:700;font-size:20px;font-stretch:80%;letter-spacing:.02em;line-height:1.15;padding:10px 3px;height:160px;white-space:nowrap;text-align:left;margin:0 auto}
 @supports not (writing-mode:sideways-lr){.mapa .eqn{writing-mode:vertical-rl;transform:rotate(180deg)}}
 .mapa .cin{background:#d9d9d9}
-.mapa .n{width:34px;text-align:center;font-weight:700;font-size:15px}
-.mapa .ptn{padding:8px 12px;font-weight:700;font-size:16.5px;font-stretch:84%;letter-spacing:.02em;white-space:nowrap;text-transform:uppercase}
+.mapa .n{width:34px;text-align:center;font-weight:800;font-size:17px}
+.mapa .ptn{padding:8px 12px;font-weight:700;font-size:18.5px;font-stretch:78%;letter-spacing:.025em;white-space:nowrap;text-transform:uppercase}
 .mapa .gr{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:800;width:30px;text-align:center}
 .mapa .cel{width:46px;height:44px;text-align:center;cursor:pointer}
 .mapa .cel:hover{background:#eef4fa}
@@ -245,7 +245,7 @@ body.ajuste .mapa{margin-bottom:0;padding-top:8px;padding-bottom:8px}
 body.claro{--bg:#eef1f5;--p1:#ffffff;--p2:#f3f5f8;--ln:#d8dfe6;--tx:#14212c;--mut:#5d6b78;--az:#1f6fd1;color-scheme:light}
 html:has(body.claro){background:#eef1f5}
 body.claro .seg button.on,body.claro .ic.on{color:#fff}
-.mapa .tbal{font-size:11.5px;font-weight:900;letter-spacing:.06em;text-align:center;margin:4px auto 0;padding:1px 5px;border-radius:5px;width:max-content;background:rgba(77,155,224,.18);color:#4d9be0}.mapa .tbal.dos{background:rgba(160,110,255,.2);color:#a07aff}
+.mapa .tbal{font-size:12.5px;font-weight:900;letter-spacing:.06em;text-align:center;margin:4px auto 0;padding:1px 5px;border-radius:5px;width:max-content;background:rgba(77,155,224,.18);color:#4d9be0}.mapa .tbal.dos{background:rgba(160,110,255,.2);color:#a07aff}
 .titmini{display:none;font-size:24px;font-weight:800;margin-right:8px;letter-spacing:-.01em}
 body.ajuste .titmini{display:block}
 .apbar{position:fixed;left:0;right:0;top:0;height:4px;background:rgba(127,127,127,.18);z-index:50}
@@ -308,6 +308,12 @@ body.ajuste .titmini{display:block}
 #tipFarol .tc{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12);white-space:pre-wrap;word-break:break-word}
 .pcom{margin-top:10px;background:rgba(61,139,253,.08);border-left:4px solid #3d8bfd;border-radius:8px;padding:8px 12px}
 .pcom p{margin:4px 0 0;white-space:pre-wrap}
+/* leitura em telas grandes: títulos e legendas maiores */
+.mapawrap .mapa th.tit{font-size:18px!important}
+.mapawrap .mapa th.sub{font-size:13px!important}
+.mapa .cint b{font-size:18px}.mapa .cint span{font-size:14px}
+.mapa-ctl .leg{font-size:16px}
+.mapa .cel svg{width:31px;height:31px}
 /* modo foco (tela cheia / apresentação) */
 body.foco .det,body.foco .rod,body.foco .aviso{display:none}
 body.foco header{margin-bottom:8px;gap:10px}

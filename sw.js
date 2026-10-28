@@ -1,6 +1,6 @@
 // Service worker do Mapa das Correias: guarda os arquivos do app para abrir sem internet.
 // Os dados NÃO passam por aqui: ficam no celular e no servidor.
-const C = 'mapa-correias-v4';
+const C = 'mapa-correias-v5';
 const SHELL = ['./', 'index.html', 'painel.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
