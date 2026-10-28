@@ -307,6 +307,12 @@ html,body{font-size:17px;-webkit-font-smoothing:antialiased;-moz-osx-font-smooth
 .devon{margin-top:12px;text-align:center;font-weight:800;font-size:14px;color:#8a5a00;background:#fff3d1;border-radius:10px;padding:8px}
 .devcard{border:1.5px dashed #d9a520;background:#fffbef}
 .discbox{margin-top:14px;border:1.5px solid var(--ln);border-radius:12px;padding:10px 12px}
+/* botão do Mapa de faróis no topo */
+.top .cta.mapa{background:linear-gradient(180deg,#e7cf96,#c8a96a)!important;color:#14212c!important;border-color:transparent!important;font-weight:800}
+.top .cta.mapa svg{stroke:#14212c}
+@media (max-width:420px){.top .st{font-size:11px;padding:5px 8px}.top{gap:7px}}
+/* celular estreito: o status só aparece quando está sem internet (o horário some para caber o título) */
+@media (max-width:440px){.top .st:not(.off){display:none}}
 /* disciplinas */
 .dgrp{display:flex;align-items:center;gap:10px;margin:14px 0 2px;padding:10px 4px 8px;border-bottom:2px solid var(--ln);cursor:pointer;list-style:none;user-select:none}
 .dgrp::-webkit-details-marker{display:none}
@@ -475,7 +481,7 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
-const APP_VERSAO = '2026-10-28 · v13';
+const APP_VERSAO = '2026-10-28 · v14';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -875,7 +881,7 @@ function vFora() {
   else if (V.fora === 'ind') corpo = vIndicadores(D);
   else if (V.fora === 'admin') corpo = vAdminInsp(D);
   else corpo = vListaInsp(D);
-  return `<header class="top"><h1>${V.fora === 'lista' ? '' : esc(tit)}</h1><button class="cta" data-a="trocarArea" aria-label="Trocar de área">${ICO.local}<span>${esc(AREAS[S.area])}</span></button><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(statusTxt())}</button></header>
+  return `<header class="top"><h1>${V.fora === 'lista' ? '' : esc(tit)}</h1><button class="cta" data-a="trocarArea" aria-label="Trocar de área">${ICO.local}<span>${esc(AREAS[S.area])}</span></button><button class="cta mapa" data-a="linkPainel" aria-label="Mapa de faróis (web)">${ICO.ind}<span>Mapa</span></button><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(statusTxt())}</button></header>
   <main>${navBotao()}${corpo}</main>`;
 }
 function vListaInsp(D) {
@@ -906,7 +912,6 @@ function vListaInsp(D) {
     ${l.length > 8 ? '<input class="in" data-k="busca" placeholder="Procurar nome" style="margin-bottom:6px" aria-label="Procurar inspetor">' : ''}
     ${nG > 1 ? `<div class="dctl"><button class="btn sec peq" data-a="grpTodos" data-v="1">Expandir todas</button><button class="btn sec peq" data-a="grpTodos" data-v="0">Recolher todas</button></div>` : ''}
     ${blocos || `<div class="vazio">Nenhum inspetor de ${esc(AREAS[S.area])} cadastrado ainda. Toque em "Cadastrar inspetor".</div>`}</div>
-  ${S.admin ? '' : `<button class="btn w sec" style="margin:4px 0 12px" data-a="linkPainel">${ICO.ind} Mapa de faróis (web)</button>`}
   ${S.admin ? `<div class="card"><h2>Administração</h2><div class="btns"><button class="btn vd" data-a="linkCadastro">Enviar link do app</button><button class="btn sec" data-a="abrirPlanilha">Abrir planilha</button><button class="btn sec" data-a="fora" data-v="admin">Editar inspetores</button></div><button class="btn w" style="margin-top:8px" data-a="linkPainel">${ICO.ind} Mapa de faróis (notebook)</button></div>` : ''}
   ${S.fila.length ? `<div class="aviso">${S.fila.length} registro(s) guardado(s) neste aparelho, esperando internet para enviar.</div>` : ''}
   <div style="height:8px"></div>${cartaoDev()}`;
@@ -952,7 +957,7 @@ function vPrincipal() {
   const corpo = { inicio: vInicio, insp: vInspecao, lista: vListas, ind: vIndicadores, mat: vMateriais, conta: vConta, equip: vEquip }[V.tela](D);
   const nav = [['inicio', 'Início'], ['insp', 'Faróis']]
     .map(([k, n]) => `<button class="${V.tela === k || (k === 'inicio' && (V.tela === 'equip' || V.tela === 'conta')) ? 'on' : ''}" data-a="tela" data-v="${k}">${ICO[k]}${n}</button>`).join('');
-  return `<header class="top"><h1>${esc(tit)}${V.tela === 'inicio' ? '' : `<small>${esc(S.eu ? S.eu.nome : '')}</small>`}</h1><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(st)}</button><button class="cta" data-a="trocarInsp" aria-label="Trocar de inspetor">${ICO.conta}<span>Trocar</span></button></header>
+  return `<header class="top"><h1>${esc(tit)}${V.tela === 'inicio' ? '' : `<small>${esc(S.eu ? S.eu.nome : '')}</small>`}</h1><button class="cta mapa" data-a="linkPainel" aria-label="Mapa de faróis (web)">${ICO.ind}<span>Mapa</span></button><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(st)}</button><button class="cta" data-a="trocarInsp" aria-label="Trocar de inspetor">${ICO.conta}<span>Trocar</span></button></header>
   <main>${navBotao()}${corpo}</main><nav class="nav">${nav}</nav>`;
 }
 
@@ -2424,7 +2429,6 @@ function vInicio(D) {
   ${S.admin ? `<div class="card devcard"><div class="row"><div class="f"><b>🔧 Modo desenvolvedor</b><div class="mut sm">Pode preencher e editar os equipamentos de todos os inspetores.</div></div></div>
     <div class="btns" style="margin-top:10px"><button class="btn ${V.todos ? 'vd' : 'sec'}" data-a="devTodos">${V.todos ? '✓ Todos os equipamentos' : 'Ver todos os equipamentos'}</button><button class="btn sec" data-a="devDiag">Diagnóstico</button></div></div>` : ''}
   ${S.admin && V.todos ? listaTodos(D) : listaMeus(D, meus)}
-  <button class="btn w sec" style="margin:14px 0 4px" data-a="linkPainel">${ICO.ind} Mapa de faróis (web)</button>
   ${cartaoDev()}`;
 }
 /* lista dos equipamentos da disciplina; na instrumentação, separada em dosadoras e balanças de fluxo */
