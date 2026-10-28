@@ -109,7 +109,7 @@ body.ajuste .det,body.ajuste .rod{display:none}
 .mapa .dias{font-size:14px;font-stretch:90%;font-weight:800;text-align:center;margin:4px auto 2px;padding:1px 4px;border-radius:6px;white-space:nowrap;opacity:.75}
 .mapawrap .mapa th.idade-am .eqn{color:#d99a00!important}
 .mapawrap .mapa th.idade-vm .eqn{color:#e0352a!important}
-.mapawrap .mapa th.idade-nv .eqn{color:#8a97a5!important;font-style:italic}
+.mapawrap .mapa th.idade-nv .eqn{color:#8a97a5!important}
 .mapawrap .mapa th.idade-am .dias{background:rgba(240,180,0,.22);color:#c58a00;opacity:1}
 .mapawrap .mapa th.idade-vm .dias{background:rgba(230,50,40,.18);color:#e0352a;opacity:1}
 .mapawrap .mapa th.idade-nv .dias{color:#8a97a5}
@@ -322,6 +322,8 @@ body.ajuste .titmini{display:block}
 @media (min-width:3600px){header,.mapa-ctl,.det,.rod,.aviso{zoom:2}}
 @media (min-width:2300px){#tipFarol{zoom:1.5}.pop .cx{zoom:1.5}}
 @media (min-width:3600px){#tipFarol{zoom:2}.pop .cx{zoom:2}}
+/* sem negrito nos nomes dos equipamentos e das partes: letra média, mais limpa de ler */
+.mapawrap .mapa .eqn,.mapawrap .mapa .ptn{font-weight:500!important}
 /* modo foco (tela cheia / apresentação) */
 body.foco .det,body.foco .rod,body.foco .aviso{display:none}
 body.foco header{margin-bottom:8px;gap:10px}
@@ -612,6 +614,13 @@ function idadeInsp(e) {
   return { c: d > PRAZO_VENCIDO ? 'vm' : d > PRAZO_ALERTA ? 'am' : 'ok', d, txt: d + 'd',
     tit: C => 'última inspeção em ' + fData(em) + (C && C.I[por] ? ' por ' + C.I[por].nome : '') + ' (há ' + d + (d === 1 ? ' dia' : ' dias') + ')' };
 }
+/* em grupos estreitos (até 3 equipamentos) o nome do inspetor vira "primeiro + último" para não quebrar em várias linhas */
+function nomeCurto(n, cols) {
+  const p = String(n || '').trim().split(/\s+/);
+  if (cols > 3 || p.length <= 2) return n;
+  const ult = p.filter(x => !/^(d[aeo]s?|e)$/i.test(x)).pop();
+  return p[0] + ' ' + ult;
+}
 function vMapa(C) {
   _CM = C;   // usado pela dica ao passar o mouse
   // na elétrica, cada equipamento é do inspetor da elétrica (inspEle); na mecânica e na instrumentação, do inspetor da mecânica
@@ -628,7 +637,7 @@ function vMapa(C) {
   }
   const todos = grupos.reduce((l, g) => l.concat(g.eqs.map((e, j) => ({ e, ini: j === 0 }))), []);
   const ini = j => todos[j].ini ? ' ini' : '';
-  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>${S.disc === 'mec' ? 'Partes' : 'Itens'}</b><span>${todos.length} ${S.disc === 'bal' ? 'balanças' : 'equipamentos'}</span></div></th>${grupos.insp !== undefined ? `<th class="tit ini" colspan="${todos.length}"><span class="nm">${esc(grupos.insp || '—')}</span></th>` : grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}"><span class="nm">${esc(g.i.nome)}</span></th>`).join('')}</tr>
+  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>${S.disc === 'mec' ? 'Partes' : 'Itens'}</b><span>${todos.length} ${S.disc === 'bal' ? 'balanças' : 'equipamentos'}</span></div></th>${grupos.insp !== undefined ? `<th class="tit ini" colspan="${todos.length}"><span class="nm">${esc(grupos.insp || '—')}</span></th>` : grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}" title="${esc(g.i.nome)}"><span class="nm">${esc(nomeCurto(g.i.nome, g.eqs.length))}</span></th>`).join('')}</tr>
     <tr>${grupos.map(g => `<th class="sub ini${g.tipo ? ' tipo' : ''}" colspan="${g.eqs.length}">${g.tipo ? esc(g.i.nome) + ' · ' : ''}${g.eqs.length} ${S.disc === 'bal' ? (g.eqs.length === 1 ? 'balança' : 'balanças') : g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
     <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div>${S.disc === 'bal' ? `<div class="tbal ${x.e.bal}">${x.e.bal === 'dos' ? 'DOS' : 'FLX'}</div>` : ''}<div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
   const linhas = MAPA.map((m, j) => {
