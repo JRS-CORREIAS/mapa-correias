@@ -422,7 +422,7 @@ function render() {
   const areaTxt = S.area === 'todas' ? 'Pátios e CC7' : AREAS[S.area];
   const cab = `${S.apres ? '<div class="apbar"><i id="apBar"></i></div>' : ''}<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
-    <button class="ic apres${S.apres ? ' on' : ''}" id="bApres" title="Alterna sozinho entre Mecânica, Elétrica e Instrumentação, ${APRES_SEG} segundos em cada">${S.apres ? '■ Parar <span id="apT"></span>' : '▶ Apresentação'}</button>
+    <button class="ic apres${S.apres ? ' on' : ''}" id="bApres" title="Abre em tela cheia, ajusta o mapa à tela e alterna sozinho entre Mecânica, Elétrica e Instrumentação, ${APRES_SEG} segundos em cada">${S.apres ? '■ Parar <span id="apT"></span>' : '▶ Apresentação'}</button>
     <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
     <button class="ic" id="bTela">Tela cheia</button>
     <div class="hora"><b id="relogio">${p2(agora.getHours())}:${p2(agora.getMinutes())}</b>${fData(Date.now())}</div></header>
@@ -484,7 +484,7 @@ function ajustarMapa() {
   t.style.zoom = z.toFixed(3);
 }
 window.addEventListener('resize', () => { if (S.ajuste) ajustarMapa(); });
-document.addEventListener('fullscreenchange', () => setTimeout(ajustarMapa, 150));
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) S.apresTela = false; setTimeout(ajustarMapa, 150); });
 function ligar(app) {
   app.querySelectorAll('[data-area]').forEach(b => b.onclick = () => { S.area = b.dataset.area; ls.set('area', S.area); render(); });
   app.querySelectorAll('[data-tema]').forEach(b => b.onclick = () => { S.tema = b.dataset.tema; ls.set('tema', S.tema); render(); });
@@ -492,8 +492,10 @@ function ligar(app) {
   app.querySelectorAll('[data-modo]').forEach(b => b.onclick = () => { S.modo = b.dataset.modo; ls.set('modo', S.modo); render(); });
   document.getElementById('bApres').onclick = () => {
     S.apres = !S.apres; ls.set('apres', S.apres); S.apresIni = Date.now();
-    if (S.apres) { S.ajuste = true; if (!APRES_ORDEM.includes(S.disc)) S.disc = 'mec'; }
-    else S.ajuste = ls.get('ajuste', false);   // volta ao que estava escolhido
+    const d = document;
+    // apresentação: abre em tela cheia e já ajusta o mapa à tela; ao parar, sai da tela cheia que ela abriu
+    if (S.apres) { S.ajuste = true; if (!APRES_ORDEM.includes(S.disc)) S.disc = 'mec'; if (!d.fullscreenElement) { try { d.documentElement.requestFullscreen().then(() => { S.apresTela = true; }).catch(() => { }); } catch (e) { } } }
+    else { S.ajuste = ls.get('ajuste', false); if (S.apresTela && d.fullscreenElement) { try { d.exitFullscreen(); } catch (e) { } } S.apresTela = false; }   // volta ao que estava escolhido
     render();
   };
   requestAnimationFrame(apresTique);
