@@ -126,6 +126,7 @@ body.ajuste .det,body.ajuste .rod{display:none}
 .temas .seg button{padding:8px 12px;font-size:13.5px}
 .mapawrap .mapa th.tit,.mapawrap .mapa th.sub{text-align:center}
 .mapawrap .mapa th.sub{white-space:nowrap}
+.mapawrap .mapa th.sub.tipo{font-size:14px;letter-spacing:.1em;padding:8px 12px}
 .mapa .tit .nm{display:inline-block;letter-spacing:.06em;text-transform:uppercase}
 .mapa .cint{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;height:100%;padding:12px 14px;text-align:left;gap:2px}
 .mapa .cint b{font-size:16px;letter-spacing:.04em;text-transform:uppercase}
@@ -243,6 +244,14 @@ body.ajuste .mapa{margin-bottom:0;padding-top:8px;padding-bottom:8px}
 body.claro{--bg:#eef1f5;--p1:#ffffff;--p2:#f3f5f8;--ln:#d8dfe6;--tx:#14212c;--mut:#5d6b78;--az:#1f6fd1;color-scheme:light}
 html:has(body.claro){background:#eef1f5}
 body.claro .seg button.on,body.claro .ic.on{color:#fff}
+.mapa .tbal{font-size:10px;font-weight:900;letter-spacing:.06em;text-align:center;margin:4px auto 0;padding:1px 5px;border-radius:5px;width:max-content;background:rgba(77,155,224,.18);color:#4d9be0}.mapa .tbal.dos{background:rgba(160,110,255,.2);color:#a07aff}
+.titmini{display:none;font-size:24px;font-weight:800;margin-right:8px;letter-spacing:-.01em}
+body.ajuste .titmini{display:block}
+.apbar{position:fixed;left:0;right:0;top:0;height:4px;background:rgba(127,127,127,.18);z-index:50}
+.apbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c8a96a,#4d9be0);transition:width 1s linear}
+.ic.apres.on{background:#c8a96a;color:#1a1405;border-color:#c8a96a}
+.ic.apres span{font-weight:600;opacity:.85}
+.seg.disc button{padding:8px 14px;font-size:14px;font-weight:800}
 .modo .seg button{padding:8px 12px;font-size:13.5px}
 /* Premium claro: marfim com dourado e azul-noite */
 .t-premium.m-claro .mapa{background:linear-gradient(180deg,#fffdf8,#f7f1e3);border:1px solid #e2cf9f;border-left:1px solid #e2cf9f;padding:14px;color:#14212c;box-shadow:0 22px 46px -26px rgba(90,65,20,.45),inset 0 1px 0 #fff}
@@ -303,13 +312,37 @@ const CATN = { carga: 'Rolo de carga', retorno: 'Rolo de retorno', cavalete: 'Ca
 const FAROL = { vd: 'Bom', am: 'Atenção', vm: 'Crítico', na: 'Não se aplica' };
 const FORD = { vm: 0, am: 1, vd: 2 };
 const PARTES = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "ck": ["Chute sem furos, trincas ou chapas soltas", "Revestimento de desgaste (placas/chapas) íntegro", "Sem marcas de batida que indiquem fluxo ruim ou entupimento", "Material cai no centro da correia", "Caixa de carga vedada, sem vazamento de material ou pó", "Parafusos e fixações completos e apertados"], "b": [[277, 28]], "t": [8, 848, 245, 963]}, {"k": "p2", "n": 2, "nome": "Guia lateral", "ck": ["Borracha de vedação sem desgaste excessivo ou folgas", "Vedação encostada na correia, sem aperto excessivo", "Grampos e suportes fixos e completos", "Chapas laterais sem furos ou desgaste", "Sem derramamento de material na região da guia"], "b": [[309, 84]], "t": [252, 848, 470, 963]}, {"k": "rolos", "n": 3, "nome": "Rolos (impacto, carga e retorno)", "ck": [], "b": [[380, 110], [549, 177], [351, 410]], "t": [478, 848, 1058, 963]}, {"k": "p6", "n": 6, "nome": "Tambores", "ck": ["Revestimento sem desgaste excessivo, descolamento ou partes faltando", "Sem material acumulado nos tambores (cauda, desvio e esticador)", "Mancais sem ruído anormal e sem aquecimento", "Mancais lubrificados e vedações sem vazamento", "Carcaça, soldas e ponta de eixo sem trincas", "Mancais e fixações apertados, tambor alinhado"], "b": [[40, 236], [764, 553]], "t": [8, 970, 222, 1088]}, {"k": "p7", "n": 7, "nome": "Acionamento", "ck": ["Motor sem ruído, vibração ou aquecimento anormal", "Redutor com nível de óleo correto e sem vazamento", "Respiro do redutor limpo", "Acoplamento sem desgaste ou folga", "Parafusos de fixação do motor e do redutor apertados", "Freio e contra-recuo (back-stop) funcionando", "Corrente do motor dentro do normal para a carga"], "b": [[821, 797]], "t": [228, 970, 422, 1088]}, {"k": "p8", "n": 8, "nome": "Estrutura do transportador", "ck": ["Longarinas, suportes e travessas sem corrosão ou danos", "Soldas sem trincas", "Parafusos completos e apertados", "Estrutura sem desalinhamento ou movimentação", "Sem ruído ou vibração anormal", "Bases e chumbadores íntegros"], "b": [[414, 577]], "t": [430, 970, 642, 1088]}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "ck": ["Correia centralizada nos tambores de cabeça e de cauda", "Correia sem raspar na estrutura", "Rolos autoalinhantes girando livres e no ângulo correto", "Nenhum rolo amarrado ou travado para corrigir desvio", "Chaves de desalinhamento limpas, íntegras e sem jampeamento", "Carga centralizada na correia"], "b": [[589, 329]], "t": [650, 970, 850, 1088]}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "ck": ["Emenda sem bordas levantadas", "Borracha da emenda sem trincas", "Sem cabos de aço ou lonas expostos", "Emenda nivelada com a superfície da correia", "Grampos da emenda mecânica completos e sem desgaste", "Sem deslocamento entre as marcas de referência"], "b": [[777, 430]], "t": [857, 970, 1060, 1088]}, {"k": "p11", "n": 11, "nome": "Condição física da correia", "ck": ["Cobertura superior sem cortes, rasgos ou furos", "Espessura da cobertura dentro do limite", "Bordas sem desfiamento ou trincas", "Sem objetos presos ou incrustados", "Sem queimaduras ou endurecimento da borracha", "Sem lonas ou cabos de aço expostos", "Sem flecha excessiva da correia entre os rolos"], "b": [[679, 367]], "t": [8, 1095, 222, 1215]}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "ck": ["Chute sem furos ou trincas", "Revestimento de desgaste íntegro", "Sem entupimento ou acúmulo de material", "Material cai no centro da correia seguinte", "Vedação e cortinas sem vazamento de pó", "Portas de inspeção fechadas e vedadas"], "b": [[1011, 659]], "t": [228, 1095, 422, 1215]}, {"k": "p13", "n": 13, "nome": "Esticamento", "ck": ["Contrapeso na posição correta, com curso livre disponível", "Carro e guias deslizando livres", "Cabos e polias do contrapeso íntegros", "Esticador de fuso sem travamento e com ajuste igual dos dois lados", "Correia sem patinar na partida", "Proteção do contrapeso instalada"], "b": [[93, 549]], "t": [430, 1095, 642, 1215]}, {"k": "p14", "n": 14, "nome": "Raspadores", "ck": ["Lâminas com desgaste normal (sem desgaste excessivo ou desigual)", "Lâmina em contato com a correia", "Largura da lâmina cobre a faixa do material", "Tensionador funcionando e na pressão correta", "Sem material retornando (carryback) depois do raspador", "Suportes e fixações íntegros"], "b": [], "t": [650, 1095, 850, 1215]}, {"k": "p15", "n": 15, "nome": "Limpadores", "ck": ["Limpador em V antes do tambor de cauda encostado na correia", "Sem material entre a correia e o tambor de cauda", "Lâminas sem desgaste excessivo", "Suporte e fixação íntegros", "Sem acúmulo de material sob o limpador"], "b": [[60, 330]], "t": [857, 1095, 1060, 1215]}, {"k": "p16", "n": 16, "nome": "Passadiços e corredores", "ck": ["Piso sem buracos, chapas soltas ou corrosão", "Sem acúmulo de material ou obstrução", "Guarda-corpo completo (travessão superior, intermediário e rodapé)", "Escadas com degraus e corrimãos íntegros", "Iluminação adequada", "Acesso livre até o transportador"], "b": [[814, 68]], "t": [8, 1225, 280, 1360]}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "ck": ["Proteções instaladas em todos os tambores e pontos de agarramento", "Proteções fixas presas, sem partes faltando ou danificadas", "Telas sem rasgos ou aberturas que permitam alcançar partes móveis", "Proteção do acionamento e do acoplamento instalada", "Proteção do contrapeso do esticamento instalada"], "b": [[992, 426]], "t": [288, 1225, 522, 1360]}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "ck": ["Chave de emergência por cabo testada e funcionando", "Cabo de emergência esticado ao longo de todo o transportador", "Botoeiras de emergência funcionando", "Chaves de desalinhamento funcionando", "Sensores (velocidade, rasgo, entupimento) funcionando", "Alarme sonoro de partida funcionando", "Nenhum dispositivo de segurança jampeado (bypass)"], "b": [[767, 808]], "t": [530, 1225, 782, 1360]}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "ck": ["Sem derramamento de material sob o transportador", "Sem acúmulo nos rolos de retorno e na estrutura", "Sem acúmulo de pó", "Bandejas e calhas de limpeza desobstruídas", "Coleta e supressão de pó funcionando", "Sem material sobre os passadiços"], "b": [[358, 720]], "t": [790, 1225, 1060, 1360]}];
-const MAPA = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "g": ""}, {"k": "p2", "n": 2, "nome": "Guia lateral", "g": ""}, {"k": "r3", "n": 3, "nome": "Rolos de impacto", "g": ""}, {"k": "r4", "n": 4, "nome": "Rolos de carga", "g": ""}, {"k": "r5", "n": 5, "nome": "Rolos de retorno", "g": ""}, {"k": "p6", "n": 6, "nome": "Tambores", "g": ""}, {"k": "p7", "n": 7, "nome": "Acionamento", "g": ""}, {"k": "p8", "n": 8, "nome": "Estrutura transportador", "g": ""}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "g": "Correia"}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "g": "Correia"}, {"k": "p11", "n": 11, "nome": "Condição física correia", "g": "Correia"}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "g": ""}, {"k": "p13", "n": 13, "nome": "Esticamento", "g": ""}, {"k": "p14", "n": 14, "nome": "Raspadores", "g": ""}, {"k": "p15", "n": 15, "nome": "Limpadores", "g": ""}, {"k": "p16", "n": 16, "nome": "Passadiços/corredores", "g": ""}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "g": ""}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "g": ""}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "g": ""}];
+let MAPA = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "g": ""}, {"k": "p2", "n": 2, "nome": "Guia lateral", "g": ""}, {"k": "r3", "n": 3, "nome": "Rolos de impacto", "g": ""}, {"k": "r4", "n": 4, "nome": "Rolos de carga", "g": ""}, {"k": "r5", "n": 5, "nome": "Rolos de retorno", "g": ""}, {"k": "p6", "n": 6, "nome": "Tambores", "g": ""}, {"k": "p7", "n": 7, "nome": "Acionamento", "g": ""}, {"k": "p8", "n": 8, "nome": "Estrutura transportador", "g": ""}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "g": "Correia"}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "g": "Correia"}, {"k": "p11", "n": 11, "nome": "Condição física correia", "g": "Correia"}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "g": ""}, {"k": "p13", "n": 13, "nome": "Esticamento", "g": ""}, {"k": "p14", "n": 14, "nome": "Raspadores", "g": ""}, {"k": "p15", "n": 15, "nome": "Limpadores", "g": ""}, {"k": "p16", "n": 16, "nome": "Passadiços/corredores", "g": ""}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "g": ""}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "g": ""}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "g": ""}];
 const FONTES_CK = 'Itens baseados no checklist de inspeção de transportadores da Martin Engineering, no manual de manutenção de correias da Sempertrans, em guias de inspeção de transportadores e na NR-12 (transportadores contínuos).';
 const PARTE = {}; PARTES.forEach(p => { PARTE[p.k] = p; });
+/* mapas da elétrica e da instrumentação (balanças) */
+const MAPA_MEC = MAPA;
+const MAPA_ELE = [{"k": "e1", "n": 1, "nome": "Motor elétrico", "g": "Acionamento"}, {"k": "e2", "n": 2, "nome": "Caixa de ligação do motor", "g": "Acionamento"}, {"k": "e3", "n": 3, "nome": "Inversor / soft-starter", "g": "Acionamento"}, {"k": "e4", "n": 4, "nome": "Gaveta do CCM / painel", "g": "Acionamento"}, {"k": "e5", "n": 5, "nome": "Cabos e eletrocalhas", "g": ""}, {"k": "e6", "n": 6, "nome": "Aterramento", "g": ""}, {"k": "e7", "n": 7, "nome": "Caixas de junção e prensa-cabos", "g": ""}, {"k": "e8", "n": 8, "nome": "Chave de emergência (cabo)", "g": "Segurança"}, {"k": "e9", "n": 9, "nome": "Chaves de desalinhamento", "g": "Segurança"}, {"k": "e10", "n": 10, "nome": "Botoeiras locais", "g": "Segurança"}, {"k": "e11", "n": 11, "nome": "Sirene de partida", "g": "Segurança"}, {"k": "e12", "n": 12, "nome": "Sensor de velocidade", "g": "Sensores"}, {"k": "e13", "n": 13, "nome": "Sensor de rasgo da correia", "g": "Sensores"}, {"k": "e14", "n": 14, "nome": "Sensor de entupimento", "g": "Sensores"}, {"k": "e16", "n": 15, "nome": "Detector de metais", "g": ""}, {"k": "e18", "n": 16, "nome": "Iluminação", "g": ""}, {"k": "e19", "n": 17, "nome": "Sinais no supervisório", "g": ""}];
+const MAPA_BAL = [{"k": "b1", "n": 1, "nome": "Células de carga", "g": "Pesagem"}, {"k": "b2", "n": 2, "nome": "Ponte / estrutura de pesagem", "g": "Pesagem"}, {"k": "b3", "n": 3, "nome": "Rolos de pesagem e alinhamento", "g": "Pesagem"}, {"k": "b4", "n": 4, "nome": "Sensor de velocidade", "g": "Pesagem"}, {"k": "b5", "n": 5, "nome": "Integrador / indicador", "g": "Eletrônica"}, {"k": "b6", "n": 6, "nome": "Cabos, caixa de junção e aterramento", "g": "Eletrônica"}, {"k": "b7", "n": 7, "nome": "Comunicação com o supervisório", "g": "Eletrônica"}, {"k": "b8", "n": 8, "nome": "Zero da balança", "g": "Aferição"}, {"k": "b9", "n": 9, "nome": "Teste com peso padrão / corrente", "g": "Aferição"}, {"k": "b10", "n": 10, "nome": "Validade da calibração", "g": "Aferição"}, {"k": "b11", "n": 11, "nome": "Limpeza e acúmulo de material", "g": ""}, {"k": "b12", "n": 12, "nome": "Motor e redutor", "g": "Dosadora"}, {"k": "b13", "n": 13, "nome": "Inversor de frequência", "g": "Dosadora"}, {"k": "b14", "n": 14, "nome": "Malha de controle (vazão x setpoint)", "g": "Dosadora"}, {"k": "b15", "n": 15, "nome": "Correia da dosadora", "g": "Dosadora"}, {"k": "b17", "n": 16, "nome": "Tensão da correia na pesagem", "g": "Fluxo"}, {"k": "b18", "n": 17, "nome": "Rolos antes e depois da balança", "g": "Fluxo"}];
+/* balanças: só os equipamentos com balança integradora (bal = tem) ou balança dosadora (bal = dos) */
+const ehBal = e => e.bal === 'tem' || e.bal === 'dos';
+const DISC = { mec: { nome: 'Mecânica', titulo: 'Mapa da Mecânica', ico: '⚙', mapa: MAPA_MEC, filtro: e => !e.soEle && !e.soBal }, ele: { nome: 'Elétrica', titulo: 'Mapa da Elétrica', ico: '⚡', mapa: MAPA_ELE, filtro: e => !!e.inspEle, dono: e => e.inspEle }, bal: { nome: 'Instrumentação', titulo: 'Mapa da Instrumentação', ico: '⚖', mapa: MAPA_BAL, filtro: e => !!e.soBal, tipos: true } };
 const LS = 'mc.mapa.';
 const ls = { get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } } };
 const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('codigo', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
 S.ajuste = ls.get('ajuste', false);
+S.disc = ls.get('disc', 'mec'); if (!DISC[S.disc]) S.disc = 'mec';
+/* Apresentação: alterna Mecânica → Elétrica → Instrumentação, 90 segundos em cada (continua depois de recarregar) */
+const APRES_SEG = 90, APRES_ORDEM = ['mec', 'ele', 'bal'];
+S.apres = ls.get('apres', false); S.apresIni = Date.now();
+if (S.apres) S.ajuste = true;   // na apresentação o mapa fica sempre ajustado à tela
+function apresTique() {
+  if (!S.apres) return;
+  const pass = (Date.now() - S.apresIni) / 1000;
+  if (pass >= APRES_SEG) {
+    S.disc = APRES_ORDEM[(APRES_ORDEM.indexOf(S.disc) + 1) % APRES_ORDEM.length];
+    S.apresIni = Date.now(); render(); return;
+  }
+  const falta = Math.ceil(APRES_SEG - pass), prox = DISC[APRES_ORDEM[(APRES_ORDEM.indexOf(S.disc) + 1) % APRES_ORDEM.length]].nome;
+  const t = document.getElementById('apT'); if (t) t.textContent = '· ' + prox + ' em ' + Math.floor(falta / 60) + ':' + String(falta % 60).padStart(2, '0');
+  const b = document.getElementById('apBar'); if (b) b.style.width = (pass / APRES_SEG * 100).toFixed(2) + '%';
+}
+setInterval(apresTique, 1000);
 S.tema = ls.get('tema', 'premium'); S.modo = ls.get('modo', 'escuro');   // estilo do mapa e modo claro/escuro, lembrados neste computador
 if (S.tema === 'escuro') { S.tema = 'basico'; S.modo = 'escuro'; }
 if (!['basico', 'premium', 'super'].includes(S.tema)) S.tema = 'premium';
@@ -373,6 +406,7 @@ const barra = g => { const a = pct(g.amU, g.total), r = pct(g.vmU, g.total); ret
 const sem = f => `<span class="sem" role="img" aria-label="Semáforo ${f ? FAROL[f].toLowerCase() : 'sem avaliação'}"><i class="${f === 'vm' ? 'on vm' : ''}"></i><i class="${f === 'am' ? 'on am' : ''}"></i><i class="${f === 'vd' ? 'on vd' : ''}"></i></span>`;
 
 function render() {
+  MAPA = DISC[S.disc].mapa;
   document.body.classList.toggle('claro', S.modo === 'claro');
   S.ver = { t: 'mapa' };   // esta versão mostra só o mapa de faróis
   const app = document.getElementById('app');
@@ -386,8 +420,9 @@ function render() {
   }
   const C = calcular(), G = C.G, agora = new Date();
   const areaTxt = S.area === 'todas' ? 'Pátios e CC7' : AREAS[S.area];
-  const cab = `<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
+  const cab = `${S.apres ? '<div class="apbar"><i id="apBar"></i></div>' : ''}<header><div class="marca"><img src="icon-192.png" alt=""><div><h1>Mapa das Correias</h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
+    <button class="ic apres${S.apres ? ' on' : ''}" id="bApres" title="Alterna sozinho entre Mecânica, Elétrica e Instrumentação, ${APRES_SEG} segundos em cada">${S.apres ? '■ Parar <span id="apT"></span>' : '▶ Apresentação'}</button>
     <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
     <button class="ic" id="bTela">Tela cheia</button>
     <div class="hora"><b id="relogio">${p2(agora.getHours())}:${p2(agora.getMinutes())}</b>${fData(Date.now())}</div></header>
@@ -453,7 +488,15 @@ document.addEventListener('fullscreenchange', () => setTimeout(ajustarMapa, 150)
 function ligar(app) {
   app.querySelectorAll('[data-area]').forEach(b => b.onclick = () => { S.area = b.dataset.area; ls.set('area', S.area); render(); });
   app.querySelectorAll('[data-tema]').forEach(b => b.onclick = () => { S.tema = b.dataset.tema; ls.set('tema', S.tema); render(); });
+  app.querySelectorAll('[data-disc]').forEach(b => b.onclick = () => { S.disc = b.dataset.disc; ls.set('disc', S.disc); S.apresIni = Date.now(); render(); });
   app.querySelectorAll('[data-modo]').forEach(b => b.onclick = () => { S.modo = b.dataset.modo; ls.set('modo', S.modo); render(); });
+  document.getElementById('bApres').onclick = () => {
+    S.apres = !S.apres; ls.set('apres', S.apres); S.apresIni = Date.now();
+    if (S.apres) { S.ajuste = true; if (!APRES_ORDEM.includes(S.disc)) S.disc = 'mec'; }
+    else S.ajuste = ls.get('ajuste', false);   // volta ao que estava escolhido
+    render();
+  };
+  requestAnimationFrame(apresTique);
   document.getElementById('bAjuste').onclick = () => { S.ajuste = !S.ajuste; ls.set('ajuste', S.ajuste); render(); };
   requestAnimationFrame(ajustarMapa);
   document.getElementById('bTela').onclick = () => {
@@ -508,32 +551,40 @@ const DEFS_SUPER = `<svg width="0" height="0" style="position:absolute" aria-hid
 const PRAZO_ALERTA = 15, PRAZO_VENCIDO = 30;   // dias
 function idadeInsp(e) {
   let em = 0, por = '';
-  Object.values(e.partes || {}).forEach(x => { if (x && x.em > em) { em = x.em; por = x.por; } });
+  MAPA.forEach(m => { const x = (e.partes || {})[m.k]; if (x && x.em > em) { em = x.em; por = x.por; } });
   if (!em) return { c: 'nv', d: null, txt: 'nunca', tit: () => 'nunca inspecionado' };
   const d = Math.max(0, Math.floor((Date.now() - em) / 864e5));
   return { c: d > PRAZO_VENCIDO ? 'vm' : d > PRAZO_ALERTA ? 'am' : 'ok', d, txt: d + 'd',
     tit: C => 'última inspeção em ' + fData(em) + (C && C.I[por] ? ' por ' + C.I[por].nome : '') + ' (há ' + d + (d === 1 ? ' dia' : ' dias') + ')' };
 }
 function vMapa(C) {
-  const ids = C.insp.map(i => i.id).filter(id => C.I[id]).sort((a, b) => cmp(C.I[a].nome, C.I[b].nome));
+  // na elétrica, cada equipamento é do inspetor da elétrica (inspEle); na mecânica e na instrumentação, do inspetor da mecânica
+  const D0 = DISC[S.disc], dono = D0.dono || (e => e.inspId), vale = e => !D0.filtro || D0.filtro(e);
+  const ids = C.insp.map(i => i.id).filter(id => C.I[id] && C.eqs.some(x => dono(x.e) === id && vale(x.e))).sort((a, b) => cmp(C.I[a].nome, C.I[b].nome));
   const sel = S.mapaInsp && ids.includes(S.mapaInsp) ? [S.mapaInsp] : ids;
   // todos os inspetores numa tabela só, um depois do outro (em série), com as partes fixas à esquerda
-  const grupos = sel.map(id => ({ i: C.I[id], eqs: C.eqs.filter(x => x.e.inspId === id).map(x => x.e).sort((a, b) => cmp(a.nome, b.nome)) })).filter(g => g.eqs.length);
+  let grupos = sel.map(id => ({ i: C.I[id], eqs: C.eqs.filter(x => dono(x.e) === id && vale(x.e)).map(x => x.e).sort((a, b) => cmp(a.nome, b.nome)) })).filter(g => g.eqs.length);
+  if (D0.tipos) {
+    const tds = grupos.reduce((l, g) => l.concat(g.eqs), []), nomes = [...new Set(grupos.map(g => g.i.nome))].join(', ');
+    // um campo único com o nome do inspetor (em cima, ocupando todas as colunas) e, embaixo, os tipos de balança
+    grupos = [['dos', 'Dosadoras'], ['tem', 'Balanças de fluxo']].map(([t, n]) => ({ i: { nome: n }, tipo: true, eqs: tds.filter(e => e.bal === t) })).filter(g => g.eqs.length);
+    grupos.insp = nomes;
+  }
   const todos = grupos.reduce((l, g) => l.concat(g.eqs.map((e, j) => ({ e, ini: j === 0 }))), []);
   const ini = j => todos[j].ini ? ' ini' : '';
-  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>Partes</b><span>${todos.length} equipamentos</span></div></th>${grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}"><span class="nm">${esc(g.i.nome)}</span></th>`).join('')}</tr>
-    <tr>${grupos.map(g => `<th class="sub ini" colspan="${g.eqs.length}">${g.eqs.length} ${g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
-    <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div><div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
+  const cab = `<tr><th class="cin fx" colspan="3" rowspan="3"><div class="cint"><b>${S.disc === 'mec' ? 'Partes' : 'Itens'}</b><span>${todos.length} ${S.disc === 'bal' ? 'balanças' : 'equipamentos'}</span></div></th>${grupos.insp !== undefined ? `<th class="tit ini" colspan="${todos.length}"><span class="nm">${esc(grupos.insp || '—')}</span></th>` : grupos.map(g => `<th class="tit ini" colspan="${g.eqs.length}"><span class="nm">${esc(g.i.nome)}</span></th>`).join('')}</tr>
+    <tr>${grupos.map(g => `<th class="sub ini${g.tipo ? ' tipo' : ''}" colspan="${g.eqs.length}">${g.tipo ? esc(g.i.nome) + ' · ' : ''}${g.eqs.length} ${S.disc === 'bal' ? (g.eqs.length === 1 ? 'balança' : 'balanças') : g.eqs.length > 3 ? 'transportadores' : 'transp.'}</th>`).join('')}</tr>
+    <tr>${todos.map((x, j) => { const id = idadeInsp(x.e); return `<th class="${ini(j)} idade-${id.c}" title="${esc(x.e.nome)} · ${esc(id.tit(C))}"><div class="eqn">${esc(x.e.nome)}</div>${S.disc === 'bal' ? `<div class="tbal ${x.e.bal}">${x.e.bal === 'dos' ? 'DOS' : 'FLX'}</div>` : ''}<div class="dias">${id.txt}</div></th>`; }).join('')}</tr>`;
   const linhas = MAPA.map((m, j) => {
-    const grp = m.g === 'Correia' ? (MAPA[j - 1] && MAPA[j - 1].g === 'Correia' ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === 'Correia').length}">CORREIA</td>`) : '';
-    const nome = m.g === 'Correia' ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
+    const grp = m.g ? (MAPA[j - 1] && MAPA[j - 1].g === m.g ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === m.g).length}">${esc(m.g.toUpperCase())}</td>`) : '';
+    const nome = m.g ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
     return `<tr><td class="n fx">${m.n}</td>${nome}${todos.map((x, k) => { const p = (x.e.partes || {})[m.k]; return `<td class="cel${ini(k)}" data-cel="${esc(x.e.id)}|${m.k}" title="${esc(x.e.nome)} · ${esc(m.nome)}">${ICF(p ? p.f : '')}</td>`; }).join('')}</tr>`;
   }).join('');
   const blocos = todos.length ? `<div class="mapa">${DEFS_SUPER}<table><thead>${cab}</thead><tbody>${linhas}</tbody></table></div>` : '';
-  return `<section class="det"><div class="f"><h2>Mapa de faróis</h2><div class="m">Farol de cada parte do transportador, marcado pelo inspetor na inspeção · clique numa célula para ver quem avaliou e quando</div></div></section>
+  return `<section class="det"><div class="f"><h2>${DISC[S.disc].titulo}</h2><div class="m">${S.disc === 'bal' ? 'Farol de cada item das balanças dosadoras e de fluxo' : S.disc === 'ele' ? 'Farol de cada item elétrico e de instrumentação do transportador' : 'Farol de cada parte do transportador'}, marcado pelo inspetor na inspeção · clique numa célula para ver quem avaliou e quando</div></div></section>
   <div class="mapawrap t-${S.tema} m-${S.modo}">
-  <div class="mapa-ctl"><div class="temas modo"><div class="seg">${[['claro', '☀ Claro'], ['escuro', '☾ Escuro']].map(([k, n]) => `<button class="${S.modo === k ? 'on' : ''}" data-modo="${k}">${n}</button>`).join('')}</div></div><div class="temas"><span>Estilo</span><div class="seg">${TEMAS.map(([k, n]) => `<button class="${S.tema === k ? 'on' : ''}" data-tema="${k}">${n}</button>`).join('')}</div></div><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
-    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span></div>
+  <div class="mapa-ctl"><h2 class="titmini">${DISC[S.disc].ico} ${DISC[S.disc].titulo}</h2><div class="temas"><div class="seg disc">${Object.keys(DISC).map(k => `<button class="${S.disc === k ? 'on' : ''}" data-disc="${k}">${DISC[k].ico} ${DISC[k].nome}</button>`).join('')}</div></div><div class="temas modo"><div class="seg">${[['claro', '☀ Claro'], ['escuro', '☾ Escuro']].map(([k, n]) => `<button class="${S.modo === k ? 'on' : ''}" data-modo="${k}">${n}</button>`).join('')}</div></div><div class="temas"><span>Estilo</span><div class="seg">${TEMAS.map(([k, n]) => `<button class="${S.tema === k ? 'on' : ''}" data-tema="${k}">${n}</button>`).join('')}</div></div><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
+    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span>${S.disc === 'bal' ? '<span><b class="tbal" style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(77,155,224,.18);color:#4d9be0">FLX</b> balança de fluxo</span><span><b style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(160,110,255,.2);color:#a07aff">DOS</b> dosadora</span>' : ''}</div>
     <div class="leg idleg"><b>Última inspeção:</b><span><i class="pt ok"></i>até ${PRAZO_ALERTA} dias</span><span><i class="pt am"></i>${PRAZO_ALERTA + 1} a ${PRAZO_VENCIDO} dias</span><span><i class="pt vm"></i>mais de ${PRAZO_VENCIDO} dias</span><span><i class="pt nv"></i>nunca</span>${(() => { const v = todos.filter(x => ['vm', 'nv'].includes(idadeInsp(x.e).c)).length; return v ? `<span class="venc">⚠ ${v} ${v === 1 ? 'equipamento' : 'equipamentos'} com inspeção vencida ou nunca feita</span>` : ''; })()}</div></div>
   ${blocos || '<section class="pn"><div class="vazio">Nenhum equipamento para mostrar.</div></section>'}</div>`;
 }

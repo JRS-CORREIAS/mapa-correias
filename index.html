@@ -297,6 +297,28 @@ h1,h2,h3{font-stretch:100%;letter-spacing:-.02em}
 .in{border-radius:14px;border-width:1px}
 .in:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,169,106,.18)}
 .dev{background:linear-gradient(180deg,#fff,#fbfaf7)}
+/* disciplinas */
+.dgrp{display:flex;align-items:center;gap:10px;margin:14px 0 2px;padding:10px 4px 8px;border-bottom:2px solid var(--ln);cursor:pointer;list-style:none;user-select:none}
+.dgrp::-webkit-details-marker{display:none}
+.dgrp em{font-style:normal;font-size:20px;line-height:1;color:#8a96a3;transition:transform .2s;margin-left:2px;transform:translateY(-3px)}
+details.dbox:not([open]) .dgrp em{transform:rotate(-90deg)}
+details.dbox:not([open]) .dgrp{border-bottom-style:dashed}
+.dbox:first-of-type .dgrp{margin-top:6px}
+.dctl{display:flex;gap:8px;justify-content:flex-end;margin:4px 0 0}
+.dgrp:first-of-type{margin-top:6px}
+.dgrp span{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:#eef1f5}
+.dgrp b{font-size:15px;letter-spacing:.02em}
+.dgrp i{margin-left:auto;font-style:normal;font-size:12.5px;font-weight:700;color:#6b7785}
+.dgrp.mec span{background:#e8eef6}.dgrp.ele span{background:#fff4d6}.dgrp.bal span{background:#e6f3ee}
+.dgrp.mec{border-color:#9fb4cc}.dgrp.ele{border-color:#e7c35a}.dgrp.bal{border-color:#7cc0a3}
+.av.ele{background:linear-gradient(145deg,#8a6a12,#c79a26)}.av.bal{background:linear-gradient(145deg,#1d6b51,#2f9a74)}
+.dseg{display:flex;gap:6px;margin:12px 0 4px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:4px;overflow-x:auto}
+.dseg button{flex:1;min-width:0;border:0;background:transparent;color:rgba(255,255,255,.78);font:inherit;font-weight:700;font-size:13.5px;padding:9px 8px;border-radius:10px;white-space:nowrap;cursor:pointer}
+.dseg button small{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:1px 7px}
+.dseg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.dseg button.on small{background:var(--ink);color:#fff}
+.dtag{display:inline-block;margin:12px 0 2px;font-weight:800;font-size:13px;letter-spacing:.04em;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 12px}
+.gtit{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut,#6b7785);padding:14px 2px 4px;border-bottom:1px solid var(--ln)}
 </style>
 </head>
 <body>
@@ -340,9 +362,24 @@ const FAROL = { vd: { n: 'Verde', s: 'Equipamento bom' }, am: { n: 'Amarelo', s:
 const FAROL_ORD = { vm: 0, am: 1, vd: 2 };
 /* ===== partes do transportador (imagem partes.jpg) e checklists ===== */
 const PARTES = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "ck": ["Chute sem furos, trincas ou chapas soltas", "Revestimento de desgaste (placas/chapas) íntegro", "Sem marcas de batida que indiquem fluxo ruim ou entupimento", "Material cai no centro da correia", "Caixa de carga vedada, sem vazamento de material ou pó", "Parafusos e fixações completos e apertados"], "b": [[277, 28]], "t": [8, 848, 245, 963]}, {"k": "p2", "n": 2, "nome": "Guia lateral", "ck": ["Borracha de vedação sem desgaste excessivo ou folgas", "Vedação encostada na correia, sem aperto excessivo", "Grampos e suportes fixos e completos", "Chapas laterais sem furos ou desgaste", "Sem derramamento de material na região da guia"], "b": [[309, 84]], "t": [252, 848, 470, 963]}, {"k": "rolos", "n": 3, "nome": "Rolos (impacto, carga e retorno)", "ck": [], "b": [[380, 110], [549, 177], [351, 410]], "t": [478, 848, 1058, 963]}, {"k": "p6", "n": 6, "nome": "Tambores", "ck": ["Revestimento sem desgaste excessivo, descolamento ou partes faltando", "Sem material acumulado nos tambores (cauda, desvio e esticador)", "Mancais sem ruído anormal e sem aquecimento", "Mancais lubrificados e vedações sem vazamento", "Carcaça, soldas e ponta de eixo sem trincas", "Mancais e fixações apertados, tambor alinhado"], "b": [[40, 236], [764, 553]], "t": [8, 970, 222, 1088]}, {"k": "p7", "n": 7, "nome": "Acionamento", "ck": ["Motor sem ruído, vibração ou aquecimento anormal", "Redutor com nível de óleo correto e sem vazamento", "Respiro do redutor limpo", "Acoplamento sem desgaste ou folga", "Parafusos de fixação do motor e do redutor apertados", "Freio e contra-recuo (back-stop) funcionando", "Corrente do motor dentro do normal para a carga"], "b": [[821, 797]], "t": [228, 970, 422, 1088]}, {"k": "p8", "n": 8, "nome": "Estrutura do transportador", "ck": ["Longarinas, suportes e travessas sem corrosão ou danos", "Soldas sem trincas", "Parafusos completos e apertados", "Estrutura sem desalinhamento ou movimentação", "Sem ruído ou vibração anormal", "Bases e chumbadores íntegros"], "b": [[414, 577]], "t": [430, 970, 642, 1088]}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "ck": ["Correia centralizada nos tambores de cabeça e de cauda", "Correia sem raspar na estrutura", "Rolos autoalinhantes girando livres e no ângulo correto", "Nenhum rolo amarrado ou travado para corrigir desvio", "Chaves de desalinhamento limpas, íntegras e sem jampeamento", "Carga centralizada na correia"], "b": [[589, 329]], "t": [650, 970, 850, 1088]}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "ck": ["Emenda sem bordas levantadas", "Borracha da emenda sem trincas", "Sem cabos de aço ou lonas expostos", "Emenda nivelada com a superfície da correia", "Grampos da emenda mecânica completos e sem desgaste", "Sem deslocamento entre as marcas de referência"], "b": [[777, 430]], "t": [857, 970, 1060, 1088]}, {"k": "p11", "n": 11, "nome": "Condição física da correia", "ck": ["Cobertura superior sem cortes, rasgos ou furos", "Espessura da cobertura dentro do limite", "Bordas sem desfiamento ou trincas", "Sem objetos presos ou incrustados", "Sem queimaduras ou endurecimento da borracha", "Sem lonas ou cabos de aço expostos", "Sem flecha excessiva da correia entre os rolos"], "b": [[679, 367]], "t": [8, 1095, 222, 1215]}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "ck": ["Chute sem furos ou trincas", "Revestimento de desgaste íntegro", "Sem entupimento ou acúmulo de material", "Material cai no centro da correia seguinte", "Vedação e cortinas sem vazamento de pó", "Portas de inspeção fechadas e vedadas"], "b": [[1011, 659]], "t": [228, 1095, 422, 1215]}, {"k": "p13", "n": 13, "nome": "Esticamento", "ck": ["Contrapeso na posição correta, com curso livre disponível", "Carro e guias deslizando livres", "Cabos e polias do contrapeso íntegros", "Esticador de fuso sem travamento e com ajuste igual dos dois lados", "Correia sem patinar na partida", "Proteção do contrapeso instalada"], "b": [[93, 549]], "t": [430, 1095, 642, 1215]}, {"k": "p14", "n": 14, "nome": "Raspadores", "ck": ["Lâminas com desgaste normal (sem desgaste excessivo ou desigual)", "Lâmina em contato com a correia", "Largura da lâmina cobre a faixa do material", "Tensionador funcionando e na pressão correta", "Sem material retornando (carryback) depois do raspador", "Suportes e fixações íntegros"], "b": [], "t": [650, 1095, 850, 1215]}, {"k": "p15", "n": 15, "nome": "Limpadores", "ck": ["Limpador em V antes do tambor de cauda encostado na correia", "Sem material entre a correia e o tambor de cauda", "Lâminas sem desgaste excessivo", "Suporte e fixação íntegros", "Sem acúmulo de material sob o limpador"], "b": [[60, 330]], "t": [857, 1095, 1060, 1215]}, {"k": "p16", "n": 16, "nome": "Passadiços e corredores", "ck": ["Piso sem buracos, chapas soltas ou corrosão", "Sem acúmulo de material ou obstrução", "Guarda-corpo completo (travessão superior, intermediário e rodapé)", "Escadas com degraus e corrimãos íntegros", "Iluminação adequada", "Acesso livre até o transportador"], "b": [[814, 68]], "t": [8, 1225, 280, 1360]}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "ck": ["Proteções instaladas em todos os tambores e pontos de agarramento", "Proteções fixas presas, sem partes faltando ou danificadas", "Telas sem rasgos ou aberturas que permitam alcançar partes móveis", "Proteção do acionamento e do acoplamento instalada", "Proteção do contrapeso do esticamento instalada"], "b": [[992, 426]], "t": [288, 1225, 522, 1360]}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "ck": ["Chave de emergência por cabo testada e funcionando", "Cabo de emergência esticado ao longo de todo o transportador", "Botoeiras de emergência funcionando", "Chaves de desalinhamento funcionando", "Sensores (velocidade, rasgo, entupimento) funcionando", "Alarme sonoro de partida funcionando", "Nenhum dispositivo de segurança jampeado (bypass)"], "b": [[767, 808]], "t": [530, 1225, 782, 1360]}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "ck": ["Sem derramamento de material sob o transportador", "Sem acúmulo nos rolos de retorno e na estrutura", "Sem acúmulo de pó", "Bandejas e calhas de limpeza desobstruídas", "Coleta e supressão de pó funcionando", "Sem material sobre os passadiços"], "b": [[358, 720]], "t": [790, 1225, 1060, 1360]}];
-const MAPA = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "g": ""}, {"k": "p2", "n": 2, "nome": "Guia lateral", "g": ""}, {"k": "r3", "n": 3, "nome": "Rolos de impacto", "g": ""}, {"k": "r4", "n": 4, "nome": "Rolos de carga", "g": ""}, {"k": "r5", "n": 5, "nome": "Rolos de retorno", "g": ""}, {"k": "p6", "n": 6, "nome": "Tambores", "g": ""}, {"k": "p7", "n": 7, "nome": "Acionamento", "g": ""}, {"k": "p8", "n": 8, "nome": "Estrutura transportador", "g": ""}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "g": "Correia"}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "g": "Correia"}, {"k": "p11", "n": 11, "nome": "Condição física correia", "g": "Correia"}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "g": ""}, {"k": "p13", "n": 13, "nome": "Esticamento", "g": ""}, {"k": "p14", "n": 14, "nome": "Raspadores", "g": ""}, {"k": "p15", "n": 15, "nome": "Limpadores", "g": ""}, {"k": "p16", "n": 16, "nome": "Passadiços/corredores", "g": ""}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "g": ""}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "g": ""}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "g": ""}];
+let MAPA = [{"k": "p1", "n": 1, "nome": "Chute de carregamento", "g": ""}, {"k": "p2", "n": 2, "nome": "Guia lateral", "g": ""}, {"k": "r3", "n": 3, "nome": "Rolos de impacto", "g": ""}, {"k": "r4", "n": 4, "nome": "Rolos de carga", "g": ""}, {"k": "r5", "n": 5, "nome": "Rolos de retorno", "g": ""}, {"k": "p6", "n": 6, "nome": "Tambores", "g": ""}, {"k": "p7", "n": 7, "nome": "Acionamento", "g": ""}, {"k": "p8", "n": 8, "nome": "Estrutura transportador", "g": ""}, {"k": "p9", "n": 9, "nome": "Alinhamento da correia", "g": "Correia"}, {"k": "p10", "n": 10, "nome": "Emendas da correia", "g": "Correia"}, {"k": "p11", "n": 11, "nome": "Condição física correia", "g": "Correia"}, {"k": "p12", "n": 12, "nome": "Chute de descarga", "g": ""}, {"k": "p13", "n": 13, "nome": "Esticamento", "g": ""}, {"k": "p14", "n": 14, "nome": "Raspadores", "g": ""}, {"k": "p15", "n": 15, "nome": "Limpadores", "g": ""}, {"k": "p16", "n": 16, "nome": "Passadiços/corredores", "g": ""}, {"k": "p17", "n": 17, "nome": "Proteções NR 12", "g": ""}, {"k": "p18", "n": 18, "nome": "Acessórios de segurança", "g": ""}, {"k": "p19", "n": 19, "nome": "Limpeza do transportador", "g": ""}];
 const FONTES_CK = 'Itens baseados no checklist de inspeção de transportadores da Martin Engineering, no manual de manutenção de correias da Sempertrans, em guias de inspeção de transportadores e na NR-12 (transportadores contínuos).';
 const PARTE = {}; PARTES.forEach(p => { PARTE[p.k] = p; });
+/* ===== três disciplinas (mecânica, elétrica e instrumentação), cada uma com a sua lista de itens ===== */
+const MAPA_MEC = MAPA;
+const MAPA_ELE = [{"k": "e1", "n": 1, "nome": "Motor elétrico", "g": "Acionamento"}, {"k": "e2", "n": 2, "nome": "Caixa de ligação do motor", "g": "Acionamento"}, {"k": "e3", "n": 3, "nome": "Inversor / soft-starter", "g": "Acionamento"}, {"k": "e4", "n": 4, "nome": "Gaveta do CCM / painel", "g": "Acionamento"}, {"k": "e5", "n": 5, "nome": "Cabos e eletrocalhas", "g": ""}, {"k": "e6", "n": 6, "nome": "Aterramento", "g": ""}, {"k": "e7", "n": 7, "nome": "Caixas de junção e prensa-cabos", "g": ""}, {"k": "e8", "n": 8, "nome": "Chave de emergência (cabo)", "g": "Segurança"}, {"k": "e9", "n": 9, "nome": "Chaves de desalinhamento", "g": "Segurança"}, {"k": "e10", "n": 10, "nome": "Botoeiras locais", "g": "Segurança"}, {"k": "e11", "n": 11, "nome": "Sirene de partida", "g": "Segurança"}, {"k": "e12", "n": 12, "nome": "Sensor de velocidade", "g": "Sensores"}, {"k": "e13", "n": 13, "nome": "Sensor de rasgo da correia", "g": "Sensores"}, {"k": "e14", "n": 14, "nome": "Sensor de entupimento", "g": "Sensores"}, {"k": "e16", "n": 15, "nome": "Detector de metais", "g": ""}, {"k": "e18", "n": 16, "nome": "Iluminação", "g": ""}, {"k": "e19", "n": 17, "nome": "Sinais no supervisório", "g": ""}];
+const MAPA_BAL = [{"k": "b1", "n": 1, "nome": "Células de carga", "g": "Pesagem"}, {"k": "b2", "n": 2, "nome": "Ponte / estrutura de pesagem", "g": "Pesagem"}, {"k": "b3", "n": 3, "nome": "Rolos de pesagem e alinhamento", "g": "Pesagem"}, {"k": "b4", "n": 4, "nome": "Sensor de velocidade", "g": "Pesagem"}, {"k": "b5", "n": 5, "nome": "Integrador / indicador", "g": "Eletrônica"}, {"k": "b6", "n": 6, "nome": "Cabos, caixa de junção e aterramento", "g": "Eletrônica"}, {"k": "b7", "n": 7, "nome": "Comunicação com o supervisório", "g": "Eletrônica"}, {"k": "b8", "n": 8, "nome": "Zero da balança", "g": "Aferição"}, {"k": "b9", "n": 9, "nome": "Teste com peso padrão / corrente", "g": "Aferição"}, {"k": "b10", "n": 10, "nome": "Validade da calibração", "g": "Aferição"}, {"k": "b11", "n": 11, "nome": "Limpeza e acúmulo de material", "g": ""}, {"k": "b12", "n": 12, "nome": "Motor e redutor", "g": "Dosadora"}, {"k": "b13", "n": 13, "nome": "Inversor de frequência", "g": "Dosadora"}, {"k": "b14", "n": 14, "nome": "Malha de controle (vazão x setpoint)", "g": "Dosadora"}, {"k": "b15", "n": 15, "nome": "Correia da dosadora", "g": "Dosadora"}, {"k": "b17", "n": 16, "nome": "Tensão da correia na pesagem", "g": "Fluxo"}, {"k": "b18", "n": 17, "nome": "Rolos antes e depois da balança", "g": "Fluxo"}];
+[MAPA_ELE, MAPA_BAL].forEach(l => l.forEach(m => { PARTE[m.k] = { k: m.k, n: m.n, nome: m.nome, ck: [], t: [0, 0, 0, 0] }; }));
+const DISC = {
+  mec: { nome: 'Mecânica', ico: '⚙', mapa: MAPA_MEC, un: 'partes', de: (e, id) => e.inspId === id && !e.soEle && !e.soBal, txt: 'Preencha os faróis das partes dos seus transportadores.' },
+  ele: { nome: 'Elétrica', ico: '⚡', mapa: MAPA_ELE, un: 'itens', de: (e, id) => e.inspEle === id, txt: 'Preencha os faróis dos itens elétricos dos seus transportadores.' },
+  bal: { nome: 'Instrumentação', ico: '⚖', mapa: MAPA_BAL, un: 'itens', de: (e, id) => !!e.soBal && e.inspId === id, txt: 'Preencha os faróis dos itens das suas balanças dosadoras e de fluxo.' }
+};
+const equipsDisc = (D, d, id) => Object.values(D.equip).filter(e => e.ativo !== false && DISC[d].de(e, id)).sort((a, b) => cmpTxt(a.nome, b.nome));
+const discsDo = (D, id) => Object.keys(DISC).filter(d => equipsDisc(D, d, id).length);
+/* semáforo do equipamento só com os itens da disciplina que está aberta */
+const farolDe = (e, d) => pior(DISC[d].mapa.map(m => e.partes && e.partes[m.k] && e.partes[m.k].f));
+const farolD = e => pior(MAPA.map(m => e.partes && e.partes[m.k] && e.partes[m.k].f));
 /* contorno aproximado de cada parte no desenho (para colorir a parte inspecionada) */
 const PECA = {
   p1: ['M20 10 L250 8 L238 110 L200 150 L60 150 L30 95 Z'], p2: ['M150 110 L295 100 L292 160 L155 185 Z'],
@@ -564,7 +601,7 @@ function barra(g) {
   <div class="leg"><span><i style="background:var(--vd)"></i>Bons ${pctTxt(pct(g.bons, g.total))}</span><span><i style="background:var(--am)"></i>Atenção ${pctTxt(pct(g.amU, g.total))}</span><span><i style="background:var(--vm)"></i>Troca ${pctTxt(pct(g.vmU, g.total))}</span></div>`;
 }
 const nomeInsp = (D, id) => (D.insp[id] && D.insp[id].nome) || (S.eu && S.eu.id === id ? S.eu.nome : '—');
-const meusEquips = D => Object.values(D.equip).filter(e => e.ativo !== false && e.inspId === S.eu.id).sort((a, b) => cmpTxt(a.nome, b.nome));
+const meusEquips = D => equipsDisc(D, S.disc || 'mec', S.eu.id);
 const outrosEquips = D => Object.values(D.equip).filter(e => e.ativo !== false && e.inspId !== S.eu.id).sort((a, b) => cmpTxt(a.nome, b.nome));
 const tiposCat = (D, cat) => Object.values(D.tipo).filter(t => t.cat === cat).sort((a, b) => cmpTxt(a.ni, b.ni));
 const tipoTxt = t => t ? 'NI ' + t.ni + (t.desc ? ' · ' + t.desc : '') : 'Tipo não encontrado';
@@ -710,7 +747,7 @@ function navNome(s) {
   if (!s.a) return 'Áreas';
   if (!s.e) return { lista: 'Inspetores', cadastro: 'Cadastrar inspetor', mat: 'Rolos e cavaletes', ind: 'Indicadores', admin: 'Inspetores' }[s.f] || 'Inspetores';
   if (S.eu && s.e !== S.eu.id) return (D.insp[s.e] || {}).nome || 'Inspetor';
-  if (s.t === 'insp') return s.p ? (s.p === 'rolos' ? 'Rolos' : (PARTE[s.p] || {}).nome || 'Parte') : s.q ? 'Partes do equipamento' : 'Inspeção';
+  if (s.t === 'insp') return s.p ? (s.p === 'rolos' ? 'Rolos' : (PARTE[s.p] || {}).nome || 'Parte') : s.q ? (S.disc === 'mec' ? 'Partes do equipamento' : 'Itens do equipamento') : 'Inspeção';
   if (s.t === 'equip') return (D.equip[s.q] || {}).nome || 'Equipamento';
   return { inicio: 'Minha página', lista: 'Listas', ind: 'Indicadores', mat: 'Rolos e cavaletes' }[s.t] || 'Voltar';
 }
@@ -764,6 +801,9 @@ function render(bg) {
   if (bg && a && a.closest && a.closest('#app') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) { _pend = true; return; }
   _pend = false;
   navRegistrar();
+  // disciplina aberta: a da inspeção em andamento ou a escolhida pelo inspetor (só as que ele tem)
+  if (S.eu) { const ds = discsDo(dados(), S.eu.id); if (V.insp && V.insp.disc) S.disc = V.insp.disc; else if (!ds.includes(S.disc)) S.disc = ds.includes(ls.get('disc.' + S.eu.id, '')) ? ls.get('disc.' + S.eu.id, '') : (ds[0] || 'mec'); }
+  MAPA = (DISC[S.disc] || DISC.mec).mapa;
   const app = $('#app');
   if (!S.srv) app.innerHTML = vConectar();
   else if (!S.codigo) app.innerHTML = vAcesso();
@@ -829,13 +869,22 @@ function vFora() {
 function vListaInsp(D) {
   const ult = ls.get('ultimo', ''), at = itensAtivos(D);
   const l = Object.values(D.insp).filter(i => i.ativo && i.area === S.area).sort((a, b) => cmpTxt(a.nome, b.nome));
-  const linha = i => {
-    const ne = Object.values(D.equip).filter(e => e.inspId === i.id && e.ativo !== false).length;
-    const eqI = Object.values(D.equip).filter(e => e.inspId === i.id && e.ativo !== false), vmN = eqI.filter(e => e.farol === 'vm').length, amN = eqI.filter(e => e.farol === 'am').length;
-    return `<div class="li tap" data-a="escolherInsp" data-id="${i.id}" data-nome="${esc(chave(i.nome))}"><span class="av">${esc(iniciais(i.nome))}</span>
-      <div class="f"><b>${esc(i.nome)}</b><div class="mut sm">${i.matricula ? 'Matrícula ' + esc(i.matricula) + ' · ' : ''}${plural(ne, 'equipamento', 'equipamentos')}${i.id === ult ? ' · último neste aparelho' : ''}</div></div>
+  // uma linha por inspetor dentro da disciplina (quem atua em duas aparece nas duas)
+  const linha = (i, d) => {
+    const eqs = d ? equipsDisc(D, d, i.id) : [], fs = eqs.map(e => farolDe(e, d));
+    const vmN = fs.filter(f => f === 'vm').length, amN = fs.filter(f => f === 'am').length;
+    const ne = d ? plural(eqs.length, d === 'bal' ? 'balança' : 'equipamento', d === 'bal' ? 'balanças' : 'equipamentos') : 'nenhum equipamento ainda';
+    return `<div class="li tap" data-a="escolherInsp" data-id="${i.id}" data-disc="${d || ''}" data-nome="${esc(chave(i.nome))}"><span class="av ${d || ''}">${esc(iniciais(i.nome))}</span>
+      <div class="f"><b>${esc(i.nome)}</b><div class="mut sm">${i.matricula ? 'Matrícula ' + esc(i.matricula) + ' · ' : ''}${ne}${i.id === ult ? ' · último neste aparelho' : ''}</div></div>
       ${vmN ? `<span class="chip vm">${vmN}</span>` : ''}${amN ? `<span class="chip am">${amN}</span>` : ''}<span style="font-size:24px;color:#a5b1bc">›</span></div>`;
   };
+  const porDisc = Object.keys(DISC).map(d => [d, l.filter(i => equipsDisc(D, d, i.id).length)]), semEq = l.filter(i => !discsDo(D, i.id).length);
+  // cada disciplina recolhe e expande tocando no título; o aparelho lembra o que ficou recolhido
+  const fechados = ls.get('grpFechado', {});
+  const bloco = (d, ico, nome, li) => `<details class="dbox" data-g="${d || 'sem'}" ${fechados[d || 'sem'] ? '' : 'open'}><summary class="dgrp ${d}"><span>${ico}</span><b>${nome}</b><i>${plural(li.length, 'inspetor', 'inspetores')}</i><em aria-hidden="true">⌄</em></summary>${li.map(i => linha(i, d)).join('')}</details>`;
+  const blocos = porDisc.filter(([d, li]) => li.length).map(([d, li]) => bloco(d, DISC[d].ico, DISC[d].nome, li)).join('')
+    + (semEq.length ? bloco('', '＋', 'Sem equipamentos', semEq) : '');
+  const nG = porDisc.filter(([d, li]) => li.length).length + (semEq.length ? 1 : 0);
   const eqA = Object.values(D.equip).filter(e => e.ativo !== false && D.insp[e.inspId] && D.insp[e.inspId].area === S.area);
   return `<section class="hero"><div class="marca">Mapa das Correias</div><h2>Faróis dos equipamentos</h2><div class="hs">${esc(AREAD[S.area])} · cada inspetor preenche os faróis dos seus equipamentos</div>
     <div class="hk"><div><b>${nfmt(l.length)}</b><span>Inspetores</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'vm').length)}</b><span><i class="dot vm"></i>Críticos</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'am').length)}</b><span><i class="dot am"></i>Em atenção</span></div></div>
@@ -843,7 +892,8 @@ function vListaInsp(D) {
   <div class="sec-t"><h2>Toque no seu nome</h2></div>
   <div class="card" style="padding-top:6px;padding-bottom:6px">
     ${l.length > 8 ? '<input class="in" data-k="busca" placeholder="Procurar nome" style="margin-bottom:6px" aria-label="Procurar inspetor">' : ''}
-    ${l.map(linha).join('') || `<div class="vazio">Nenhum inspetor de ${esc(AREAS[S.area])} cadastrado ainda. Toque em "Cadastrar inspetor".</div>`}</div>
+    ${nG > 1 ? `<div class="dctl"><button class="btn sec peq" data-a="grpTodos" data-v="1">Expandir todas</button><button class="btn sec peq" data-a="grpTodos" data-v="0">Recolher todas</button></div>` : ''}
+    ${blocos || `<div class="vazio">Nenhum inspetor de ${esc(AREAS[S.area])} cadastrado ainda. Toque em "Cadastrar inspetor".</div>`}</div>
   ${S.admin ? `<div class="card"><h2>Administração</h2><div class="btns"><button class="btn vd" data-a="linkCadastro">Enviar link do app</button><button class="btn sec" data-a="abrirPlanilha">Abrir planilha</button><button class="btn sec" data-a="fora" data-v="admin">Editar inspetores</button></div><button class="btn w" style="margin-top:8px" data-a="linkPainel">${ICO.ind} Mapa de faróis (notebook)</button></div>` : ''}
   ${S.fila.length ? `<div class="aviso">${S.fila.length} registro(s) guardado(s) neste aparelho, esperando internet para enviar.</div>` : ''}
   <div style="height:8px"></div>${cartaoDev()}`;
@@ -1920,7 +1970,7 @@ const A = {
   fora(el) { V.fora = el.dataset.v; render(); scrollTo(0, 0); },
   escolherArea(el) { S.area = el.dataset.v; ls.set('area', S.area); mudou(); V.fora = 'lista'; V.listaSel = null; ls.del('listaSel'); render(); scrollTo(0, 0); },
   trocarArea() { S.area = ''; S.eu = null; V.insp = null; ls.del('area'); mudou(); render(); scrollTo(0, 0); },
-  escolherInsp(el) { escolherInsp(el.dataset.id); },
+  escolherInsp(el) { if (el.dataset.disc) ls.set('disc.' + el.dataset.id, el.dataset.disc); S.disc = el.dataset.disc || S.disc; escolherInsp(el.dataset.id); },
   trocarInsp() { S.eu = null; V.insp = null; V.fora = 'lista'; V.tela = 'inicio'; fecharModal(); render(); scrollTo(0, 0); },
   confirmarOk() { const f = _volta; _volta = null; fecharModal(); f && f(); },
   voltar() { if (!navVoltar()) render(); },
@@ -2174,7 +2224,7 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('input', ev => {
   const el = ev.target, k = el.dataset && el.dataset.k;
-  if (k === 'busca') { const q = chave(el.value); document.querySelectorAll('[data-a=escolherInsp]').forEach(x => { x.hidden = q && !x.dataset.nome.includes(q); }); return; }
+  if (k === 'busca') { const q = chave(el.value); document.querySelectorAll('[data-a=escolherInsp]').forEach(x => { x.hidden = q && !x.dataset.nome.includes(q); }); document.querySelectorAll('details.dbox').forEach(g => { const vis = [...g.querySelectorAll('[data-a=escolherInsp]')].some(x => !x.hidden); g.hidden = q && !vis; if (q && vis) g.open = true; }); return; }
   if (!k || !V.insp) return;
   if (k === 'cav') { V.insp.cav = el.value; trocouCav(V.insp); if ((V.insp.sel || []).length) V.insp.sel = []; }
   else if (k === 'obs') V.insp.obs = el.value;
@@ -2313,33 +2363,50 @@ try { ls.del('emailFila'); } catch (e) { }
 const diasDesde = ms => Math.max(0, Math.floor((Date.now() - ms) / 864e5));
 const idadeDias = ms => { const d = diasDesde(ms); return d === 0 ? 'menos de 1 dia' : d === 1 ? '1 dia' : d + ' dias'; };
 const idadeCls = ms => !ms ? 'nv' : diasDesde(ms) > 30 ? 'vm' : diasDesde(ms) > 15 ? 'am' : 'ok';
-const contFar = l => { const n = { vd: 0, am: 0, vm: 0, x: 0 }; l.forEach(e => { n[FAROL[e.farol] ? e.farol : 'x']++; }); return n; };
-const partesAval = e => Object.values(e.partes || {}).filter(x => x && x.f).length;
+const contFar = l => { const n = { vd: 0, am: 0, vm: 0, x: 0 }; l.forEach(e => { n[FAROL[farolD(e)] ? farolD(e) : 'x']++; }); return n; };
+const partesAval = e => MAPA.filter(m => e.partes && e.partes[m.k] && e.partes[m.k].f).length;
 function linhaEquipFarol(D, e, acao) {
   const n = partesAval(e), P = e.partes || {};
-  const nc = Object.values(P).reduce((a, x) => a + Object.values((x && x.ck) || {}).filter(v => v === 'nc').length, 0);
-  const ult = Object.values(P).reduce((m, x) => Math.max(m, (x && x.em) || 0), 0);
-  return `<div class="li tap" data-a="${acao}" data-id="${e.id}">${semaforo(e.farol)}<div class="f"><b>${esc(e.nome)}</b>
-    <div class="mut sm">${esc(e.area || '')}${e.area ? ' · ' : ''}${n} de ${MAPA.length} partes avaliadas</div>
+  const ult = MAPA.reduce((m, x) => Math.max(m, (P[x.k] && P[x.k].em) || 0), 0);
+  const ef = farolD(e), un = DISC[S.disc].un;
+  return `<div class="li tap" data-a="${acao}" data-id="${e.id}">${semaforo(ef)}<div class="f"><b>${esc(e.nome)}</b>
+    <div class="mut sm">${esc(e.area || '')}${e.area ? ' · ' : ''}${n} de ${MAPA.length} ${un} ${un === 'partes' ? 'avaliadas' : 'avaliados'}</div>
     <div class="idade ${idadeCls(ult)}">${ult ? 'Última inspeção há ' + idadeDias(ult) + ' · ' + fData(ult) : 'Nunca inspecionado'}</div>
     <div class="mini-far">${MAPA.map(m => { const f = P[m.k] && P[m.k].f; return `<i class="${f || ''}" title="${esc(m.nome)}"></i>`; }).join('')}</div></div>
-    <div style="text-align:right">${e.farol ? `<span class="chip ${e.farol}">${FAROL[e.farol].n}</span>` : '<span class="chip az">Sem avaliação</span>'}</div></div>`;
+    <div style="text-align:right">${ef ? `<span class="chip ${ef}">${FAROL[ef].n}</span>` : '<span class="chip az">Sem avaliação</span>'}</div></div>`;
 }
 function vInicio(D) {
   const meus = meusEquips(D), n = contFar(meus);
   return `<section class="hero"><div class="row"><span class="av lg">${esc(iniciais(S.eu.nome))}</span><div class="f"><h2>${esc(S.eu.nome)}</h2><div class="hs">${S.eu.matricula ? 'Matrícula ' + esc(S.eu.matricula) : 'Inspetor'}</div></div></div>
-    <p class="obj">Preencha os faróis dos seus equipamentos. Cada farol salvo vai direto para o <b>Mapa de faróis</b>.</p>
+    ${chaveDisc(D)}
+    <p class="obj">${DISC[S.disc].txt} Cada farol salvo vai direto para o <b>Mapa ${S.disc === 'mec' ? 'da Mecânica' : S.disc === 'ele' ? 'da Elétrica' : 'da Instrumentação'}</b>.</p>
     <div class="hk"><div><b>${nfmt(n.vm)}</b><span><i class="dot vm"></i>Críticos</span></div><div><b>${nfmt(n.am)}</b><span><i class="dot am"></i>Em atenção</span></div><div><b>${nfmt(n.vd)}</b><span><i class="dot vd"></i>Bons</span><i>${n.x ? n.x + ' sem avaliação' : ''}</i></div></div>
     <button class="btn cl w" data-a="tela" data-v="insp">${ICO.insp} ${V.insp ? 'Continuar · ' + esc((D.equip[V.insp.equipId] || {}).nome || '') : 'Preencher faróis'}</button></section>
-  <div class="sec-t"><h2>Meus equipamentos</h2><button class="btn sec peq" data-a="novoEquip">+ Novo</button></div>
-  <div class="card">${meus.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('') || `<div class="vazio">Você ainda não tem equipamentos.<br><br><button class="btn" data-a="novoEquip">Cadastrar equipamento</button></div>`}</div>
+  ${listaMeus(D, meus)}
   ${cartaoDev()}`;
+}
+/* lista dos equipamentos da disciplina; na instrumentação, separada em dosadoras e balanças de fluxo */
+function listaMeus(D, meus) {
+  const vazio = `<div class="vazio">Você ainda não tem equipamentos ${S.disc === 'ele' ? 'na elétrica' : ''}.${S.disc === 'ele' ? '' : '<br><br><button class="btn" data-a="novoEquip">Cadastrar equipamento</button>'}</div>`;
+  const novo = S.disc === 'ele' ? '' : '<button class="btn sec peq" data-a="novoEquip">+ Novo</button>';
+  if (S.disc === 'bal') return [['dos', 'Dosadoras'], ['tem', 'Balanças de fluxo']].map(([t, n], j) => { const l = meus.filter(e => (e.bal || 'tem') === t); return l.length ? `<div class="sec-t"><h2>${n} <span class="mut" style="font-weight:600">· ${l.length}</span></h2>${j ? '' : novo}</div><div class="card">${l.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('')}</div>` : ''; }).join('') || `<div class="sec-t"><h2>Minhas balanças</h2>${novo}</div><div class="card">${vazio}</div>`;
+  return `<div class="sec-t"><h2>${S.disc === 'mec' ? 'Meus equipamentos' : 'Meus equipamentos da elétrica'} <span class="mut" style="font-weight:600">· ${meus.length}</span></h2>${novo}</div>
+  <div class="card">${meus.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('') || vazio}</div>`;
+}
+/* chave de disciplina: só aparece para quem tem equipamentos em mais de uma */
+function chaveDisc(D) {
+  const ds = discsDo(D, S.eu.id);
+  if (ds.length < 2) return `<div class="dtag">${DISC[S.disc].ico} ${DISC[S.disc].nome}</div>`;
+  return `<div class="dseg">${ds.map(d => `<button class="${d === S.disc ? 'on' : ''}" data-a="disc" data-v="${d}">${DISC[d].ico} ${DISC[d].nome}<small>${equipsDisc(D, d, S.eu.id).length}</small></button>`).join('')}</div>`;
+}
+A.disc = el => { if (V.insp) { toast('Finalize ou saia da inspeção em andamento para trocar de disciplina.'); return; } S.disc = el.dataset.v; ls.set('disc.' + S.eu.id, S.disc); render(); scrollTo(0, 0); };
+function _semUso() {
 }
 function vEscolherEquip(D) {
   const meus = meusEquips(D), out = outrosEquips(D);
-  return `<div class="card"><div class="eyebrow">Mapa das Correias</div><h2>Qual equipamento você vai avaliar?</h2>
-  ${meus.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('') || '<div class="mut">Você ainda não cadastrou equipamentos.</div>'}
-  <button class="btn w sec" style="margin-top:10px" data-a="novoEquip" data-insp="1">+ Cadastrar equipamento</button></div>
+  return `<div class="card"><div class="eyebrow">${DISC[S.disc].ico} ${DISC[S.disc].nome}</div><h2>Qual equipamento você vai avaliar?</h2>
+  ${meus.map(e => linhaEquipFarol(D, e, 'iniciarInsp')).join('') || '<div class="mut">Você ainda não tem equipamentos.</div>'}
+  ${S.disc === 'ele' ? '' : '<button class="btn w sec" style="margin-top:10px" data-a="novoEquip" data-insp="1">+ Cadastrar equipamento</button>'}</div>
 `;
 }
 function vEquip(D) {
@@ -2357,35 +2424,36 @@ function vEquip(D) {
 /* parte: só o farol (verde, amarelo, vermelho ou azul = não se aplica), sem checklist e sem comentário */
 function vParte(D, k) {
   const I = V.insp, e = D.equip[I.equipId], p = PARTE[k], r = rascunhoParte(e, k), [x0, y0, x1, y1] = p.t, ant = r.ant;
-  return `<div class="card"><div class="row" style="gap:12px;align-items:center"><span class="num g">${p.n}</span><div class="f"><div class="mut sm">${esc(e.nome)}</div><h2 style="margin:0">${esc(p.nome)}</h2></div></div>
+  return `<div class="card"><div class="row" style="gap:12px;align-items:center"><span class="num g">${p.n}</span><div class="f"><div class="mut sm">${DISC[S.disc].ico} ${esc(e.nome)}${m0(k) && m0(k).g ? ' · ' + esc(m0(k).g) : ''}</div><h2 style="margin:0">${esc(p.nome)}</h2></div></div>
     ${ant ? `<div class="dica">Última avaliação: <b>${FAROL[ant.f].n.toLowerCase()}</b> em ${fData(ant.em)} por ${esc(nomeInsp(D, ant.por))}</div>` : ''}</div>
-  <div class="card"><h3 style="margin-bottom:2px">Farol da parte</h3><div class="mut sm">Pela sua avaliação.</div>
+  <div class="card"><h3 style="margin-bottom:2px">Farol ${S.disc === 'mec' ? 'da parte' : 'do item'}</h3><div class="mut sm">Pela sua avaliação.</div>
     ${blocoFarol(r.f, 'farolParte')}
-    <button type="button" class="btn na w" style="margin-top:10px" data-a="naParte">Não se aplica (esta correia não tem ${esc(p.nome.toLowerCase())})</button>
-    <button class="btn w ${r.f || 'sec'}" style="margin-top:14px" data-a="salvarParte" ${r.f ? '' : 'disabled'}>${r.f ? 'Salvar ' + esc(p.nome.toLowerCase()) : 'Escolha o farol da parte'}</button></div>
-  <button class="btn w sec" data-a="partesSemSalvar">Voltar às partes sem salvar</button>`;
+    <button type="button" class="btn na w" style="margin-top:10px" data-a="naParte">Não se aplica (${S.disc === 'mec' ? 'esta correia' : 'este equipamento'} não tem ${esc(p.nome.toLowerCase())})</button>
+    <button class="btn w ${r.f || 'sec'}" style="margin-top:14px" data-a="salvarParte" ${r.f ? '' : 'disabled'}>${r.f ? 'Salvar ' + esc(p.nome.toLowerCase()) : 'Escolha o farol ' + (S.disc === 'mec' ? 'da parte' : 'do item')}</button></div>
+  <button class="btn w sec" data-a="partesSemSalvar">Voltar ${S.disc === 'mec' ? 'às partes' : 'aos itens'} sem salvar</button>`;
 }
 /* ao abrir o equipamento: a lista das 19 partes com o farol de cada uma (sem a imagem da correia) */
 function vPartes(D) {
   const I = V.insp, e = D.equip[I.equipId], P = e.partes || {}, feitas = I.feitas || {}, hoje = new Date().toDateString();
-  const n = MAPA.filter(m => P[m.k] && P[m.k].f).length, meu = e.inspId === S.eu.id || S.admin;
+  const n = MAPA.filter(m => P[m.k] && P[m.k].f).length, meu = S.disc !== 'ele' && (e.inspId === S.eu.id || S.admin), un = DISC[S.disc].un, ef = farolD(e);
   const linhas = MAPA.map(m => {
     const x = P[m.k], f = x && x.f, k = /^r[345]$/.test(m.k) ? 'rolos' : m.k;
     const agora = feitas[k] || (x && x.em && new Date(x.em).toDateString() === hoje);
-    return `<div class="li tap" data-a="parte" data-k="${k}"><span class="num">${m.n}</span><div class="f"><b>${esc((m.g ? m.g + ': ' : '') + m.nome)}</b>
-      <div class="mut sm">${x ? (f === 'na' ? 'Não se aplica' : FAROL[f].s) + ' · ' + fData(x.em) + (agora ? ' · <b style="color:var(--vd)">avaliada hoje</b>' : '') : 'Sem avaliação'}</div></div>${farolIco(f || '')}<span style="font-size:22px;color:#a5b1bc;margin-left:6px">›</span></div>`;
+    const gh = S.disc !== 'mec' && m.g && (!MAPA[MAPA.indexOf(m) - 1] || MAPA[MAPA.indexOf(m) - 1].g !== m.g) ? `<div class="gtit">${esc(m.g)}</div>` : '';
+    return `${gh}<div class="li tap" data-a="parte" data-k="${k}"><span class="num">${m.n}</span><div class="f"><b>${esc((m.g && S.disc === 'mec' ? m.g + ': ' : '') + m.nome)}</b>
+      <div class="mut sm">${x ? (f === 'na' ? 'Não se aplica' : FAROL[f].s) + ' · ' + fData(x.em) + (agora ? ' · <b style="color:var(--vd)">avaliad' + (S.disc === 'mec' ? 'a' : 'o') + ' hoje</b>' : '') : 'Sem avaliação'}</div></div>${farolIco(f || '')}<span style="font-size:22px;color:#a5b1bc;margin-left:6px">›</span></div>`;
   }).join('');
-  return `<div class="card"><div class="row"><div class="f"><div class="eyebrow">Faróis do equipamento</div><h2 style="margin:0">${esc(e.nome)}</h2>
-    <div class="mut sm">${n} de ${MAPA.length} partes avaliadas · toque numa parte para preencher o farol</div></div>${meu ? `<button class="btn sec peq" data-a="editarEquip" data-id="${e.id}">Editar</button>` : ''}</div>
-    ${e.farol ? `<div class="row" style="gap:10px;margin-top:10px">${semaforo(e.farol)}<div class="mut sm">Semáforo geral: <b>${FAROL[e.farol].s.toLowerCase()}</b> (a pior cor entre as partes)</div></div>` : ''}</div>
+  return `<div class="card"><div class="row"><div class="f"><div class="eyebrow">${DISC[S.disc].ico} ${DISC[S.disc].nome}${S.disc === 'bal' ? ' · ' + (e.bal === 'dos' ? 'Balança dosadora' : 'Balança de fluxo') : ''}</div><h2 style="margin:0">${esc(e.nome)}</h2>
+    <div class="mut sm">${n} de ${MAPA.length} ${un} ${un === 'partes' ? 'avaliadas' : 'avaliados'} · toque num${S.disc === 'mec' ? 'a parte' : ' item'} para preencher o farol</div></div>${meu ? `<button class="btn sec peq" data-a="editarEquip" data-id="${e.id}">Editar</button>` : ''}</div>
+    ${ef ? `<div class="row" style="gap:10px;margin-top:10px">${semaforo(ef)}<div class="mut sm">Semáforo ${S.disc === 'mec' ? 'da mecânica' : S.disc === 'ele' ? 'da elétrica' : 'da balança'}: <b>${FAROL[ef].s.toLowerCase()}</b> (a pior cor entre ${S.disc === 'mec' ? 'as partes' : 'os itens'})</div></div>` : ''}</div>
   <div class="card" style="padding-top:4px;padding-bottom:4px">${linhas}</div>
   <button class="btn w vd" data-a="finalizar" style="margin-bottom:8px">Finalizar inspeção</button>
   <button class="btn w sec" data-a="cancelarInsp">Sair</button>`;
 }
 /* abrir o mesmo equipamento continua a inspeção em andamento */
 function iniciarInsp(id) {
-  if (V.insp && V.insp.equipId === id) { V.insp.parte = null; salvarInsp(); fecharModal(); V.tela = 'insp'; render(); scrollTo(0, 0); return; }
-  V.insp = { equipId: id, cav: '', sel: [], nivel: 'vm', tipo: {}, obs: '', ids: [], inicio: Date.now(), parte: null, far: {}, feitas: {}, pt: {} };
+  if (V.insp && V.insp.equipId === id && (V.insp.disc || 'mec') === S.disc) { V.insp.parte = null; salvarInsp(); fecharModal(); V.tela = 'insp'; render(); scrollTo(0, 0); return; }
+  V.insp = { equipId: id, cav: '', sel: [], nivel: 'vm', tipo: {}, obs: '', ids: [], inicio: Date.now(), parte: null, far: {}, feitas: {}, pt: {}, disc: S.disc };
   salvarInsp(); fecharModal(); V.tela = 'insp'; render(); scrollTo(0, 0);
 }
 A.cancelarInsp = () => confirmar('Sair', 'Os faróis já salvos continuam salvos.', () => { V.insp = null; salvarInsp(); V.tela = 'inicio'; render(); }, 'Sair');
@@ -2417,9 +2485,13 @@ A.partesSemSalvar = () => {
   const k = I.parte;
   if (k === 'rolos') delete I.rd; else if (I.pt) delete I.pt[k];
   I.parte = null; salvarInsp(); fecharModal(); render(); scrollTo(0, 0);
-  toast('Voltou às partes sem salvar.');
+  toast(S.disc === 'mec' ? 'Voltou às partes sem salvar.' : 'Voltou aos itens sem salvar.');
 };
 
+const m0 = k => MAPA.find(m => m.k === k);
+/* recolher/expandir as disciplinas na lista de inspetores */
+document.addEventListener('toggle', ev => { const g = ev.target; if (!g.classList || !g.classList.contains('dbox')) return; if ((document.querySelector('[data-k=busca]') || {}).value) return; const f = ls.get('grpFechado', {}); if (g.open) delete f[g.dataset.g]; else f[g.dataset.g] = 1; ls.set('grpFechado', f); }, true);
+A.grpTodos = el => { const ab = el.dataset.v === '1', f = {}; document.querySelectorAll('details.dbox').forEach(g => { g.open = ab; if (!ab) f[g.dataset.g] = 1; }); ls.set('grpFechado', f); };
 /* ===== início ===== */
 (function () {
   const q = new URLSearchParams(location.search);
