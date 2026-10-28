@@ -1168,7 +1168,8 @@ function blocoFarol(f, acao, chave) {
 function setFarolRolo(k, f, quieto) {
   const I = V.insp; if (!I) return;
   I.far = Object.assign({}, I.far, { [k]: f }); I.feitas = Object.assign({}, I.feitas, { rolos: true }); salvarInsp();
-  enfileirar([{ c: 'equip', t: 'update', id: I.equipId, d: { parte: { k, f, c: '', ck: {}, em: Date.now() } } }]);
+  const c = String((I.rc || {})[k] || '').trim();
+  enfileirar([{ c: 'equip', t: 'update', id: I.equipId, d: { parte: { k, f, c, ck: {}, em: Date.now() } } }]);
   if (!quieto) toast(({ r3: 'Rolos de impacto', r4: 'Rolos de carga', r5: 'Rolos de retorno' })[k] + ': ' + (f === 'na' ? 'não se aplica' : FAROL[f].n.toLowerCase()) + '.');
 }
 function marcarFarol(f) {
@@ -2053,8 +2054,8 @@ const A = {
     toast(p.nome + ': farol ' + FAROL[r.f].n.toLowerCase() + ' salvo.');
   },
   naParte() {
-    const I = V.insp, k = I.parte, p = PARTE[k];
-    enfileirar([{ c: 'equip', t: 'update', id: I.equipId, d: { parte: { k, f: 'na', c: '', ck: {}, em: Date.now() } } }]);
+    const I = V.insp, k = I.parte, p = PARTE[k], c = String(((I.pt || {})[k] || {}).c || '').trim();
+    enfileirar([{ c: 'equip', t: 'update', id: I.equipId, d: { parte: { k, f: 'na', c, ck: {}, em: Date.now() } } }]);
     I.feitas = Object.assign({}, I.feitas, { [k]: true }); delete I.pt[k]; I.parte = null; salvarInsp(); render(); scrollTo(0, 0);
     toast(p.nome + ': não se aplica (farol azul).');
   },
@@ -2229,7 +2230,8 @@ document.addEventListener('input', ev => {
   if (k === 'cav') { V.insp.cav = el.value; trocouCav(V.insp); if ((V.insp.sel || []).length) V.insp.sel = []; }
   else if (k === 'obs') V.insp.obs = el.value;
   else if (k === 'ncar') V.insp.ncar = el.value;
-  else if (k === 'coment' && V.insp.pt && V.insp.parte && V.insp.pt[V.insp.parte]) V.insp.pt[V.insp.parte].c = el.value;
+  else if (k === 'coment' && V.insp.pt && V.insp.parte && V.insp.pt[V.insp.parte]) { V.insp.pt[V.insp.parte].c = el.value; salvarInsp(); }
+  else if (k === 'comentRolo' && V.insp) { V.insp.rc = Object.assign({}, V.insp.rc, { [el.dataset.r]: el.value }); salvarInsp(); }
   else if (k === 'ncc' && V.insp.pt && V.insp.parte && V.insp.pt[V.insp.parte]) { const r = V.insp.pt[V.insp.parte]; r.cn = r.cn || {}; r.cn[el.dataset.i] = el.value; }
   salvarInsp();
 });
@@ -2425,9 +2427,12 @@ function vEquip(D) {
 function vParte(D, k) {
   const I = V.insp, e = D.equip[I.equipId], p = PARTE[k], r = rascunhoParte(e, k), [x0, y0, x1, y1] = p.t, ant = r.ant;
   return `<div class="card"><div class="row" style="gap:12px;align-items:center"><span class="num g">${p.n}</span><div class="f"><div class="mut sm">${DISC[S.disc].ico} ${esc(e.nome)}${m0(k) && m0(k).g ? ' · ' + esc(m0(k).g) : ''}</div><h2 style="margin:0">${esc(p.nome)}</h2></div></div>
-    ${ant ? `<div class="dica">Última avaliação: <b>${FAROL[ant.f].n.toLowerCase()}</b> em ${fData(ant.em)} por ${esc(nomeInsp(D, ant.por))}</div>` : ''}</div>
+    ${ant ? `<div class="dica">Última avaliação: <b>${FAROL[ant.f].n.toLowerCase()}</b> em ${fData(ant.em)} por ${esc(nomeInsp(D, ant.por))}${ant.c ? '<br>💬 ' + esc(ant.c) : ''}</div>` : ''}</div>
   <div class="card"><h3 style="margin-bottom:2px">Farol ${S.disc === 'mec' ? 'da parte' : 'do item'}</h3><div class="mut sm">Pela sua avaliação.</div>
     ${blocoFarol(r.f, 'farolParte')}
+    <label class="l" for="pCom" style="margin-top:14px;display:block">Comentário (opcional)</label>
+    <textarea class="in" id="pCom" data-k="coment" rows="3" maxlength="400" placeholder="Ex.: ${S.disc === 'ele' ? 'cabo com isolação ressecada perto da caixa de ligação' : S.disc === 'bal' ? 'zero da balança variando, aferir na próxima parada' : 'revestimento do tambor com desgaste irregular'}">${esc(r.c || '')}</textarea>
+    <div class="mut sm" style="margin-top:4px">Aparece no Mapa de faróis ao passar o mouse sobre o farol.</div>
     <button type="button" class="btn na w" style="margin-top:10px" data-a="naParte">Não se aplica (${S.disc === 'mec' ? 'esta correia' : 'este equipamento'} não tem ${esc(p.nome.toLowerCase())})</button>
     <button class="btn w ${r.f || 'sec'}" style="margin-top:14px" data-a="salvarParte" ${r.f ? '' : 'disabled'}>${r.f ? 'Salvar ' + esc(p.nome.toLowerCase()) : 'Escolha o farol ' + (S.disc === 'mec' ? 'da parte' : 'do item')}</button></div>
   <button class="btn w sec" data-a="partesSemSalvar">Voltar ${S.disc === 'mec' ? 'às partes' : 'aos itens'} sem salvar</button>`;
@@ -2441,7 +2446,7 @@ function vPartes(D) {
     const agora = feitas[k] || (x && x.em && new Date(x.em).toDateString() === hoje);
     const gh = S.disc !== 'mec' && m.g && (!MAPA[MAPA.indexOf(m) - 1] || MAPA[MAPA.indexOf(m) - 1].g !== m.g) ? `<div class="gtit">${esc(m.g)}</div>` : '';
     return `${gh}<div class="li tap" data-a="parte" data-k="${k}"><span class="num">${m.n}</span><div class="f"><b>${esc((m.g && S.disc === 'mec' ? m.g + ': ' : '') + m.nome)}</b>
-      <div class="mut sm">${x ? (f === 'na' ? 'Não se aplica' : FAROL[f].s) + ' · ' + fData(x.em) + (agora ? ' · <b style="color:var(--vd)">avaliad' + (S.disc === 'mec' ? 'a' : 'o') + ' hoje</b>' : '') : 'Sem avaliação'}</div></div>${farolIco(f || '')}<span style="font-size:22px;color:#a5b1bc;margin-left:6px">›</span></div>`;
+      <div class="mut sm">${x ? (f === 'na' ? 'Não se aplica' : FAROL[f].s) + ' · ' + fData(x.em) + (x.c ? ' · 💬 ' + esc(x.c.length > 60 ? x.c.slice(0, 60) + '…' : x.c) : '') + (agora ? ' · <b style="color:var(--vd)">avaliad' + (S.disc === 'mec' ? 'a' : 'o') + ' hoje</b>' : '') : 'Sem avaliação'}</div></div>${farolIco(f || '')}<span style="font-size:22px;color:#a5b1bc;margin-left:6px">›</span></div>`;
   }).join('');
   return `<div class="card"><div class="row"><div class="f"><div class="eyebrow">${DISC[S.disc].ico} ${DISC[S.disc].nome}${S.disc === 'bal' ? ' · ' + (e.bal === 'dos' ? 'Balança dosadora' : 'Balança de fluxo') : ''}</div><h2 style="margin:0">${esc(e.nome)}</h2>
     <div class="mut sm">${n} de ${MAPA.length} ${un} ${un === 'partes' ? 'avaliadas' : 'avaliados'} · toque num${S.disc === 'mec' ? 'a parte' : ' item'} para preencher o farol</div></div>${meu ? `<button class="btn sec peq" data-a="editarEquip" data-id="${e.id}">Editar</button>` : ''}</div>
@@ -2471,19 +2476,20 @@ function blocoFarolInsp(D, e, I) {
   const far = Object.assign({}, I.far || {}, I.rd || {}), P = e.partes || {};
   return rolosDe(e).map(([k, n]) => `<div style="margin-top:10px"><b>${n}</b>${!far[k] && P[k] ? ` <span class="mut sm">· última: ${FAROL[P[k].f].n.toLowerCase()}, ${fData(P[k].em)}</span>` : ''}
     ${blocoFarol(far[k] || '', 'farolRolo', k)}
-    <button type="button" class="btn ${far[k] === 'na' ? 'na' : 'sec'} peq" style="margin-top:6px" data-a="farolRolo" data-k="${k}" data-v="na">${far[k] === 'na' ? '✓ ' : ''}Não se aplica (esta correia não tem ${n.toLowerCase()})</button></div>`).join('');
+    <button type="button" class="btn ${far[k] === 'na' ? 'na' : 'sec'} peq" style="margin-top:6px" data-a="farolRolo" data-k="${k}" data-v="na">${far[k] === 'na' ? '✓ ' : ''}Não se aplica (esta correia não tem ${n.toLowerCase()})</button>
+    ${(I.rd || {})[k] ? `<textarea class="in" data-k="comentRolo" data-r="${k}" rows="2" maxlength="400" style="margin-top:8px" placeholder="Comentário (opcional) sobre ${esc(n.toLowerCase())}">${esc((I.rc || {})[k] || '')}</textarea>` : ''}</div>`).join('');
 }
 A.farolRolo = el => { const I = V.insp; if (!I) return; I.rd = Object.assign({}, I.rd, { [el.dataset.k]: el.dataset.v }); salvarInsp(); render(); };
 const _concluirRolos = A.concluirRolos;
 A.concluirRolos = () => {
   const I = V.insp; if (!I) return;
-  Object.keys(I.rd || {}).forEach(k => setFarolRolo(k, I.rd[k], true)); delete I.rd; salvarInsp();
+  Object.keys(I.rd || {}).forEach(k => setFarolRolo(k, I.rd[k], true)); delete I.rd; delete I.rc; salvarInsp();
   _concluirRolos();
 };
 A.partesSemSalvar = () => {
   const I = V.insp; if (!I) return;
   const k = I.parte;
-  if (k === 'rolos') delete I.rd; else if (I.pt) delete I.pt[k];
+  if (k === 'rolos') { delete I.rd; delete I.rc; } else if (I.pt) delete I.pt[k];
   I.parte = null; salvarInsp(); fecharModal(); render(); scrollTo(0, 0);
   toast(S.disc === 'mec' ? 'Voltou às partes sem salvar.' : 'Voltou aos itens sem salvar.');
 };

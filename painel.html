@@ -296,6 +296,17 @@ body.ajuste .titmini{display:block}
 .t-super.m-claro .fi.am .b{fill:url(#spam)}.t-super.m-claro .fi.am{filter:drop-shadow(0 2px 4px rgba(200,140,0,.5))}.t-super.m-claro .fi.am .g{stroke:#3b2600}.t-super.m-claro .fi.am .gd{fill:#3b2600}
 .t-super.m-claro .fi.vm .b{fill:url(#spvm)}.t-super.m-claro .fi.vm{filter:drop-shadow(0 2px 5px rgba(220,40,30,.5))}
 .t-super.m-claro .fi.na .b{fill:url(#spna)}.t-super.m-claro .fi.na{filter:drop-shadow(0 2px 4px rgba(40,100,230,.45))}
+/* comentário do farol */
+.legcm{display:inline-block;width:0;height:0;border-style:solid;border-width:0 11px 11px 0;border-color:transparent #3d8bfd transparent transparent;vertical-align:1px}
+.mapa td.cel{position:relative}
+.mapa td.cel.cm::after{content:"";position:absolute;top:3px;right:3px;width:0;height:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent #3d8bfd transparent transparent;pointer-events:none}
+#tipFarol{position:fixed;z-index:200;display:none;max-width:340px;pointer-events:none;background:#0f1b29;color:#eef3f8;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 12px;box-shadow:0 12px 32px rgba(0,0,0,.35);font-size:14px;line-height:1.35}
+#tipFarol .tt{font-weight:800;font-size:13px;letter-spacing:.02em;color:#c9d6e3;margin-bottom:6px}
+#tipFarol .tf{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#tipFarol .tf span{color:#9fb0c1;font-size:13px}
+#tipFarol .tc{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12);white-space:pre-wrap;word-break:break-word}
+.pcom{margin-top:10px;background:rgba(61,139,253,.08);border-left:4px solid #3d8bfd;border-radius:8px;padding:8px 12px}
+.pcom p{margin:4px 0 0;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -560,6 +571,7 @@ function idadeInsp(e) {
     tit: C => 'última inspeção em ' + fData(em) + (C && C.I[por] ? ' por ' + C.I[por].nome : '') + ' (há ' + d + (d === 1 ? ' dia' : ' dias') + ')' };
 }
 function vMapa(C) {
+  _CM = C;   // usado pela dica ao passar o mouse
   // na elétrica, cada equipamento é do inspetor da elétrica (inspEle); na mecânica e na instrumentação, do inspetor da mecânica
   const D0 = DISC[S.disc], dono = D0.dono || (e => e.inspId), vale = e => !D0.filtro || D0.filtro(e);
   const ids = C.insp.map(i => i.id).filter(id => C.I[id] && C.eqs.some(x => dono(x.e) === id && vale(x.e))).sort((a, b) => cmp(C.I[a].nome, C.I[b].nome));
@@ -580,16 +592,36 @@ function vMapa(C) {
   const linhas = MAPA.map((m, j) => {
     const grp = m.g ? (MAPA[j - 1] && MAPA[j - 1].g === m.g ? '' : `<td class="gr fx2" rowspan="${MAPA.filter(x => x.g === m.g).length}">${esc(m.g.toUpperCase())}</td>`) : '';
     const nome = m.g ? `${grp}<td class="ptn fx3">${esc(m.nome)}</td>` : `<td class="ptn fx2" colspan="2">${esc(m.nome)}</td>`;
-    return `<tr><td class="n fx">${m.n}</td>${nome}${todos.map((x, k) => { const p = (x.e.partes || {})[m.k]; return `<td class="cel${ini(k)}" data-cel="${esc(x.e.id)}|${m.k}" title="${esc(x.e.nome)} · ${esc(m.nome)}">${ICF(p ? p.f : '')}</td>`; }).join('')}</tr>`;
+    return `<tr><td class="n fx">${m.n}</td>${nome}${todos.map((x, k) => { const p = (x.e.partes || {})[m.k]; return `<td class="cel${ini(k)}${p && p.c ? ' cm' : ''}" data-cel="${esc(x.e.id)}|${m.k}">${ICF(p ? p.f : '')}</td>`; }).join('')}</tr>`;
   }).join('');
   const blocos = todos.length ? `<div class="mapa">${DEFS_SUPER}<table><thead>${cab}</thead><tbody>${linhas}</tbody></table></div>` : '';
   return `<section class="det"><div class="f"><h2>${DISC[S.disc].titulo}</h2><div class="m">${S.disc === 'bal' ? 'Farol de cada item das balanças dosadoras e de fluxo' : S.disc === 'ele' ? 'Farol de cada item elétrico e de instrumentação do transportador' : 'Farol de cada parte do transportador'}, marcado pelo inspetor na inspeção · clique numa célula para ver quem avaliou e quando</div></div></section>
   <div class="mapawrap t-${S.tema} m-${S.modo}">
   <div class="mapa-ctl"><h2 class="titmini">${DISC[S.disc].ico} ${DISC[S.disc].titulo}</h2><div class="temas"><div class="seg disc">${Object.keys(DISC).map(k => `<button class="${S.disc === k ? 'on' : ''}" data-disc="${k}">${DISC[k].ico} ${DISC[k].nome}</button>`).join('')}</div></div><div class="temas modo"><div class="seg">${[['claro', '☀ Claro'], ['escuro', '☾ Escuro']].map(([k, n]) => `<button class="${S.modo === k ? 'on' : ''}" data-modo="${k}">${n}</button>`).join('')}</div></div><div class="temas"><span>Estilo</span><div class="seg">${TEMAS.map(([k, n]) => `<button class="${S.tema === k ? 'on' : ''}" data-tema="${k}">${n}</button>`).join('')}</div></div><label for="mInsp" style="color:var(--mut)">Inspetor</label><select id="mInsp"><option value="">Todos os inspetores</option>${ids.map(id => `<option value="${esc(id)}" ${S.mapaInsp === id ? 'selected' : ''}>${esc(C.I[id].nome)}</option>`).join('')}</select>
-    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span>${S.disc === 'bal' ? '<span><b class="tbal" style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(77,155,224,.18);color:#4d9be0">FLX</b> balança de fluxo</span><span><b style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(160,110,255,.2);color:#a07aff">DOS</b> dosadora</span>' : ''}</div>
+    <div class="leg"><span>${ICF('vd').replace('<svg', '<svg width="22" height="22"')} Bom</span><span>${ICF('am').replace('<svg', '<svg width="22" height="22"')} Atenção</span><span>${ICF('vm').replace('<svg', '<svg width="22" height="22"')} Crítico</span><span>${ICF('na').replace('<svg', '<svg width="22" height="22"')} Não se aplica</span><span>— sem avaliação</span><span><i class="legcm"></i> com comentário (passe o mouse)</span>${S.disc === 'bal' ? '<span><b class="tbal" style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(77,155,224,.18);color:#4d9be0">FLX</b> balança de fluxo</span><span><b style="font-size:11px;padding:1px 5px;border-radius:5px;background:rgba(160,110,255,.2);color:#a07aff">DOS</b> dosadora</span>' : ''}</div>
     <div class="leg idleg"><b>Última inspeção:</b><span><i class="pt ok"></i>até ${PRAZO_ALERTA} dias</span><span><i class="pt am"></i>${PRAZO_ALERTA + 1} a ${PRAZO_VENCIDO} dias</span><span><i class="pt vm"></i>mais de ${PRAZO_VENCIDO} dias</span><span><i class="pt nv"></i>nunca</span>${(() => { const v = todos.filter(x => ['vm', 'nv'].includes(idadeInsp(x.e).c)).length; return v ? `<span class="venc">⚠ ${v} ${v === 1 ? 'equipamento' : 'equipamentos'} com inspeção vencida ou nunca feita</span>` : ''; })()}</div></div>
   ${blocos || '<section class="pn"><div class="vazio">Nenhum equipamento para mostrar.</div></section>'}</div>`;
 }
+/* dica ao passar o mouse sobre o farol: item, cor, data, quem avaliou e o comentário (se tiver) */
+let _CM = null;
+const tipEl = () => document.getElementById('tipFarol') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'tipFarol' }));
+function tipMostrar(td, ev) {
+  if (!_CM) return;
+  const [eid, k] = td.dataset.cel.split('|'), e = _CM.d.equip.find(x => x.id === eid), m = MAPA.find(x => x.k === k); if (!e || !m) return;
+  const x = (e.partes || {})[k], t = tipEl();
+  t.innerHTML = `<div class="tt">${esc(e.nome)} · ${m.n} ${esc(m.nome)}</div>`
+    + (x ? `<div class="tf">${ICF(x.f).replace('<svg', '<svg width="18" height="18"')}<b>${FAROL[x.f]}</b><span>${fData(x.em)}${_CM.I[x.por] ? ' · ' + esc(_CM.I[x.por].nome) : ''}</span></div>${x.c ? `<div class="tc">💬 ${esc(x.c)}</div>` : ''}` : '<div class="tf"><span>Ainda não avaliado</span></div>');
+  t.style.display = 'block'; tipPos(ev);
+}
+function tipPos(ev) {
+  const t = document.getElementById('tipFarol'); if (!t || t.style.display !== 'block') return;
+  const w = t.offsetWidth, h = t.offsetHeight; let x = ev.clientX + 16, y = ev.clientY + 18;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - 12; if (y + h > innerHeight - 8) y = ev.clientY - h - 12;
+  t.style.left = Math.max(8, x) + 'px'; t.style.top = Math.max(8, y) + 'px';
+}
+document.addEventListener('mouseover', ev => { const td = ev.target.closest && ev.target.closest('td.cel[data-cel]'); if (td) tipMostrar(td, ev); else { const t = document.getElementById('tipFarol'); if (t) t.style.display = 'none'; } });
+document.addEventListener('mousemove', tipPos);
+document.addEventListener('scroll', () => { const t = document.getElementById('tipFarol'); if (t) t.style.display = 'none'; }, true);
 function popCelula(C, eid, k) {
   const e = C.d.equip.find(x => x.id === eid); if (!e) return;
   const m = MAPA.find(x => x.k === k), x = (e.partes || {})[k], pk = /^r[345]$/.test(k) ? 'rolos' : k, p = PARTE[pk];
@@ -598,7 +630,8 @@ function popCelula(C, eid, k) {
   d.innerHTML = `<div class="cx"><button class="fe">Fechar</button><h3>${esc(e.nome)} · ${m.n} ${esc(m.nome)}</h3>
     ${x ? `<div style="display:flex;align-items:center;gap:10px;margin:8px 0">${ICF(x.f).replace('<svg', '<svg width="34" height="34"')}<b style="font-size:18px">${FAROL[x.f]}</b><span style="color:var(--mut)">· ${fData(x.em)} · ${esc(C.I[x.por] ? C.I[x.por].nome : '')}</span></div>
 
-      ${x.f === 'na' ? '<p>Não se aplica a este equipamento.</p>' : ''}`
+      ${x.f === 'na' ? '<p>Não se aplica a este equipamento.</p>' : ''}
+      ${x.c ? `<div class="pcom"><b>Comentário</b><p>${esc(x.c)}</p></div>` : ''}`
       : '<p style="color:var(--mut)">Esta parte ainda não foi avaliada neste equipamento.</p>'}
 </div>`;
   d.onclick = ev => { if (ev.target === d || ev.target.classList.contains('fe')) d.remove(); };
