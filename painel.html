@@ -326,15 +326,21 @@ body.ajuste .titmini{display:block}
 .mapawrap .mapa .eqn,.mapawrap .mapa .ptn{font-weight:500!important}
 /* modo foco (tela cheia / apresentação) */
 body.foco .det,body.foco .rod,body.foco .aviso{display:none}
-body.foco header{margin-bottom:8px;gap:10px}
+body.foco header{margin-bottom:4px;gap:10px}
 body.foco header .marca img{width:34px;height:34px}
 body.foco header .marca h1{font-size:20px}
 body.foco header .marca p,body.foco header .seg[aria-label="Área"],body.foco #bAjuste{display:none}
 body.foco header .ic{padding:8px 14px;font-size:14px}
-body.foco .mapa-ctl{margin-bottom:6px;gap:10px 16px}
+body.foco .mapa-ctl{margin-bottom:4px;gap:6px 16px}
 body.foco .mapa-ctl .temas.modo,body.foco .mapa-ctl .temas.estilo,body.foco .mapa-ctl label[for=mInsp],body.foco .mapa-ctl #mInsp{display:none}
-body.foco .titmini{display:block}
-body.foco .wrap{padding-top:10px;padding-bottom:6px}
+body.foco .titmini,body.foco .mapa-ctl .temas{display:none!important}
+.dfoco{display:none;font-weight:600;opacity:.85}
+body.foco .dfoco{display:inline}
+body.foco .mapa-ctl>.leg-blk{flex-direction:row;flex-wrap:wrap;align-items:center;gap:2px 30px}
+body.foco .mapa-ctl .leg{margin:0}
+body.foco .mapawrap .mapa{padding:3px!important;margin:0!important;border-radius:8px}
+body.foco .mapawrap{margin:0}
+body.foco .wrap{padding:6px 8px 2px!important;max-width:none}
 </style>
 </head>
 <body>
@@ -459,7 +465,7 @@ function render() {
   }
   const C = calcular(), G = C.G, agora = new Date();
   const areaTxt = S.area === 'todas' ? 'Pátios e CC7' : AREAS[S.area];
-  const cab = `${S.apres ? '<div class="apbar"><i id="apBar"></i></div>' : ''}<header><div class="marca"><img src="icon-512.png" alt="" decoding="async"><div><h1>Mapa das Correias</h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
+  const cab = `${S.apres ? '<div class="apbar"><i id="apBar"></i></div>' : ''}<header><div class="marca"><img src="icon-512.png" alt="" decoding="async"><div><h1>Mapa das Correias<span class="dfoco"> · ${DISC[S.disc].ico} ${DISC[S.disc].nome}</span></h1><p>Desenvolvedor: Jeferson Rodrigo dos Santos</p></div></div>
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
     <button class="ic apres${S.apres ? ' on' : ''}" id="bApres" title="Abre em tela cheia, ajusta o mapa à tela e alterna sozinho entre Mecânica, Elétrica e Instrumentação, ${APRES_SEG} segundos em cada">${S.apres ? '■ Parar <span id="apT"></span>' : '▶ Apresentação'}</button>
     <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
@@ -527,7 +533,7 @@ function ajustarMapa() {
   box.style.overflowX = 'hidden';
   const cs = getComputedStyle(box);
   const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
-  const h = window.innerHeight - box.getBoundingClientRect().top - window.scrollY - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 14;
+  const h = window.innerHeight - box.getBoundingClientRect().top - window.scrollY - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (document.body.classList.contains('foco') ? 6 : 14);
   const nw = t.offsetWidth, nh = t.offsetHeight;
   if (!nw || !nh) return;
   const z = Math.max(.25, Math.min(w / nw, h / nh, 5));   // até 5x: em TV 4K o mapa ocupa a tela toda
