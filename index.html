@@ -307,6 +307,12 @@ html,body{font-size:17px;-webkit-font-smoothing:antialiased;-moz-osx-font-smooth
 .devon{margin-top:12px;text-align:center;font-weight:800;font-size:14px;color:#8a5a00;background:#fff3d1;border-radius:10px;padding:8px}
 .devcard{border:1.5px dashed #d9a520;background:#fffbef}
 .discbox{margin-top:14px;border:1.5px solid var(--ln);border-radius:12px;padding:10px 12px}
+/* login */
+.acbox{margin-top:14px;border:1.5px solid var(--ln);border-radius:12px;padding:10px 12px}
+.acesso{margin-top:4px;font-size:14px;color:var(--tx);display:flex;flex-wrap:wrap;gap:2px 14px}.acesso .senha{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
+.btn.bio{font-size:17px;padding:14px}
+.sessao-info{margin-top:12px;font-size:14px;color:var(--mut);text-align:center}
+.ent .dev{margin-top:18px}
 /* disciplinas */
 .dgrp{display:flex;align-items:center;gap:10px;margin:14px 0 2px;padding:10px 4px 8px;border-bottom:2px solid var(--ln);cursor:pointer;list-style:none;user-select:none}
 .dgrp::-webkit-details-marker{display:none}
@@ -475,17 +481,23 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
-const APP_VERSAO = '2026-10-28 · v16';
+const APP_VERSAO = '2026-10-31 · v17 (login)';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } },
   del(k) { try { localStorage.removeItem(LS + k); } catch (e) { } }
 };
+/* sessão do login: vale enquanto o app está aberto; ao fechar, pede login (ou biometria) de novo */
+const sess = {
+  get(k) { try { return JSON.parse(sessionStorage.getItem('mc.' + k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? sessionStorage.removeItem('mc.' + k) : sessionStorage.setItem('mc.' + k, JSON.stringify(v)); } catch (e) { } }
+};
+ls.del('codigo');   // versões antigas guardavam o código da equipe: agora o acesso é por login
 const S = {
   srv: ls.get('srv', SERVIDOR_PADRAO), eu: null, admin: ls.get('admin', false), area: ls.get('area', ''),
   base: ls.get('base', null), fila: ls.get('fila', []), sync: ls.get('sync', 0),
-  online: true, enviando: false, codigo: ls.get('codigo', '')
+  online: true, enviando: false, codigo: (sess.get('sessao') || {}).token || '', token: (sess.get('sessao') || {}).token || '', master: !!(sess.get('sessao') || {}).master, codigoMapa: ls.get('codigoMapa', '')
 };
 const V = { tela: 'inicio', entrar: 'home', cad: 'equip', ind: 'sem', lista: 'troca', listaSel: null, atencaoTodos: false, equipId: null,
   insp: null, fora: 'lista' };
@@ -532,6 +544,7 @@ function receber(r) {
 
 /* ===== servidor ===== */
 async function api(p, ms) {
+  if (p && S.token && p.codigo === S.token) { p = Object.assign({}, p, { token: S.token }); delete p.codigo; }
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms || 30000);
   try {
     const r = await fetch(S.srv, { method: 'POST', body: JSON.stringify(p), signal: ctl.signal, redirect: 'follow' });
@@ -558,6 +571,7 @@ async function sincronizar(silencioso) {
     } else r = await api({ action: 'sync', codigo: S.codigo });
     if (!r.ok) {
       if (r.erro === 'codigo-equipe') { sairLocal(msg('codigo-equipe')); return; }
+      if (r.erro === 'sessao') { sairSessao('Sua senha foi alterada ou o acesso foi desativado. Entre de novo.'); return; }
       throw new Error(r.erro);
     }
     receber(r);
@@ -577,7 +591,7 @@ function enfileirar(ops) {
   clearTimeout(_agendado); _agendado = setTimeout(() => sincronizar(true), 300);
 }
 function sairLocal(aviso) {
-  S.codigo = ''; S.eu = null; S.area = ''; S.base = null; S.fila = []; V.insp = null; S.admin = false;
+  S.codigo = ''; S.token = ''; sess.set('sessao', null); S.eu = null; S.area = ''; S.base = null; S.fila = []; V.insp = null; S.admin = false;
   ['codigo', 'admin', 'area', 'base', 'fila', 'sync', 'listaSel'].forEach(k => ls.del(k));
   mudou(); fecharModal(); V.tela = 'inicio'; V.fora = 'lista'; render();
   if (aviso) toast(aviso, 5000);
@@ -764,6 +778,7 @@ function navNome(s) {
 }
 /* botão do topo: volta para a tela anterior; sem tela anterior (app recém-aberto), sobe um nível */
 function navBotao() {
+  if (!S.admin && S.eu && V.tela === 'inicio') return '';   // inspetor: a Minha página é a tela inicial (não volta para a lista)
   const topo = NAV.pilha[NAV.pilha.length - 1];
   if (topo) return `<button class="voltar" data-a="voltar">‹ Voltar <span>· ${esc(navNome(topo))}</span></button>`;
   if (!S.area) return '';
@@ -817,7 +832,7 @@ function render(bg) {
   MAPA = (DISC[S.disc] || DISC.mec).mapa;
   const app = $('#app');
   if (!S.srv) app.innerHTML = vConectar();
-  else if (!S.codigo) app.innerHTML = vAcesso();
+  else if (!S.codigo) app.innerHTML = vLogin();
   else if (!S.area) app.innerHTML = vArea();
   else if (!S.eu) app.innerHTML = vFora();
   else app.innerHTML = vPrincipal();
@@ -847,7 +862,8 @@ function cartaoDev() {
   const txt = encodeURIComponent('Olá, Jeferson! Estou usando o app Mapa das Correias e gostaria de falar sobre ele.');
   return `<section class="dev"><div class="row"><span class="av">${esc(iniciais(DEV.nome))}</span><div class="f"><div class="dk">Desenvolvido por</div><b>${esc(DEV.nome)}</b><div class="mut sm">${esc(DEV.cargo)}</div><div class="mut sm">${esc(DEV.area)}</div></div></div>
     <a class="btn wa w" href="https://wa.me/${DEV.whats}?text=${txt}" target="_blank" rel="noopener noreferrer">${ICO.whats} Falar com o desenvolvedor</a>
-    ${!S.eu ? (S.admin ? `<div class="devon">🔧 Modo desenvolvedor ligado</div><div class="btns" style="margin-top:8px"><button class="btn sec" data-a="devDiag">Diagnóstico</button><button class="btn lin" data-a="devSair">Sair do modo desenvolvedor</button></div>` : `<button class="btn lin w" style="margin-top:8px" data-a="devEntrar">🔧 Modo desenvolvedor</button>`) : ''}</section>`;
+    ${S.codigo ? `<div class="sessao-info">Conectado como <b>${esc(S.master ? 'Administrador' : ((dados().insp[(sess.get('sessao') || {}).eu] || {}).nome || ''))}</b>${S.admin ? ' · administrador' : ''}</div>
+    <div class="btns" style="margin-top:8px">${S.admin ? '<button class="btn sec" data-a="devDiag">Diagnóstico</button>' : ''}<button class="btn lin" data-a="sair">Sair</button></div>` : ''}</section>`;
 }
 function vArea() {
   const D = S.base || {}, I = Object.values(D.insp || {}).filter(i => i.ativo);
@@ -865,12 +881,13 @@ function vFora() {
   const D = dados();
   const tit = { lista: 'Mapa das Correias', cadastro: 'Cadastrar inspetor', mat: 'Rolos e cavaletes', ind: 'Indicadores', admin: 'Inspetores' }[V.fora] || 'Mapa das Correias';
   let corpo;
-  if (V.fora === 'cadastro') corpo = `<form class="card" data-f="cadastroInsp"><h2>Cadastrar inspetor</h2>
-    <label class="l" for="cNome">Nome completo</label><input class="in" id="cNome" name="nome" autocomplete="name" required>
+  if (V.fora === 'cadastro') corpo = `<form class="card" data-f="cadastroInsp" autocomplete="off"><h2>Novo inspetor</h2>
+    <label class="l" for="cNome">Nome completo</label><input class="in" id="cNome" name="nome" autocomplete="off" required>
     <label class="l" for="cMat">Matrícula (opcional)</label><input class="in" id="cMat" name="matricula" autocomplete="off">
+    <label class="l" for="cArea">Área</label><select class="in" id="cArea" name="area">${Object.keys(AREAS).map(k => `<option value="${k}" ${S.area === k ? 'selected' : ''}>${esc(AREAD[k])}</option>`).join('')}</select>
+    ${camposAcesso({})}
     <div class="erro" id="fe" style="display:none"></div>
-    <button class="btn w" style="margin-top:14px">Cadastrar e abrir minha página</button>
-    <div class="dica" style="margin-top:8px">Área: <b>${esc(AREAD[S.area])}</b>. Depois do cadastro, o seu nome aparece na lista da tela inicial. Nas próximas vezes é só tocar nele.</div></form>`;
+    <button class="btn w" style="margin-top:14px">Cadastrar inspetor</button></form>`;
   else if (V.fora === 'mat') corpo = vMateriais(D);
   else if (V.fora === 'ind') corpo = vIndicadores(D);
   else if (V.fora === 'admin') corpo = vAdminInsp(D);
@@ -900,7 +917,7 @@ function vListaInsp(D) {
   const eqA = Object.values(D.equip).filter(e => e.ativo !== false && D.insp[e.inspId] && D.insp[e.inspId].area === S.area);
   return `<section class="hero"><div class="marca">Mapa das Correias</div><h2>Faróis dos equipamentos</h2><div class="hs">${esc(AREAD[S.area])} · cada inspetor preenche os faróis dos seus equipamentos</div>
     <div class="hk"><div><b>${nfmt(l.length)}</b><span>Inspetores</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'vm').length)}</b><span><i class="dot vm"></i>Críticos</span></div><div><b>${nfmt(eqA.filter(e => e.farol === 'am').length)}</b><span><i class="dot am"></i>Em atenção</span></div></div>
-    <div style="height:16px"></div><button class="opc prim" data-a="linkPainel" style="margin:0 0 10px"><span class="ic">${ICO.ind}</span><span><b>Mapa de faróis</b><small>Abrir ou enviar o link da página web</small></span></button><button class="opc prim" data-a="fora" data-v="cadastro" style="margin:0"><span class="ic">${ICO.novo}</span><span><b>Cadastrar inspetor</b><small>Primeira vez? Cadastre o seu nome</small></span></button></section>
+    <div style="height:16px"></div><button class="opc prim" data-a="linkPainel" style="margin:0 0 10px"><span class="ic">${ICO.ind}</span><span><b>Mapa de faróis</b><small>Abrir ou enviar o link da página web</small></span></button>${S.admin ? `<button class="opc prim" data-a="fora" data-v="cadastro" style="margin:0"><span class="ic">${ICO.novo}</span><span><b>Novo inspetor</b><small>Cadastrar com login e senha</small></span></button>` : ''}</section>
   <div class="sec-t"><h2>Toque no seu nome</h2></div>
   <div class="card" style="padding-top:6px;padding-bottom:6px">
     ${l.length > 8 ? '<input class="in" data-k="busca" placeholder="Procurar nome" style="margin-bottom:6px" aria-label="Procurar inspetor">' : ''}
@@ -911,9 +928,13 @@ function vListaInsp(D) {
   <div style="height:8px"></div>${cartaoDev()}`;
 }
 function vAdminInsp(D) {
-  return `<div class="card"><h2>Inspetores</h2><div class="mut sm" style="margin-bottom:6px">Desativar tira o nome da lista. Os itens já marcados continuam.</div>
-  ${Object.values(D.insp).sort((a, b) => cmpTxt(a.nome, b.nome)).map(i => `<div class="li"><span class="av">${esc(iniciais(i.nome))}</span><div class="f"><b>${esc(i.nome)}</b><div class="mut sm">${esc(AREAS[i.area] || 'Sem área')} · ${i.matricula ? 'Matrícula ' + esc(i.matricula) : 'Sem matrícula'}${i.ativo ? '' : ' · <b style="color:var(--vm)">desativado</b>'}</div></div>
-    <button class="btn sec peq" data-a="editarInsp" data-id="${i.id}">Editar</button><button class="btn ${i.ativo ? 'lin' : 'vd'} peq" data-a="inspAtivo" data-id="${i.id}" data-v="${i.ativo ? 0 : 1}">${i.ativo ? 'Desativar' : 'Ativar'}</button></div>`).join('') || '<div class="mut">Nenhum.</div>'}</div>`;
+  const sem = Object.values(D.insp).filter(i => i.ativo && !i.login).length;
+  return `<div class="card"><div class="row"><div class="f"><h2 style="margin:0">Inspetores e acessos</h2><div class="mut sm">Login e senha de cada inspetor. Só o administrador vê esta tela.</div></div><button class="btn peq" data-a="fora" data-v="cadastro">+ Novo</button></div>
+  ${sem ? `<div class="aviso" style="margin-top:10px">${sem} inspetor(es) ativo(s) ainda sem login: não conseguem entrar no app. Toque em Editar para criar.</div>` : ''}
+  <div class="btns" style="margin-top:10px"><button class="btn sec peq" data-a="verSenhas">${V.verSenhas ? '🙈 Esconder senhas' : '👁 Ver senhas'}</button></div>
+  ${Object.values(D.insp).sort((a, b) => cmpTxt(a.nome, b.nome)).map(i => `<div class="li" style="flex-wrap:wrap"><span class="av">${esc(iniciais(i.nome))}</span><div class="f"><b>${esc(i.nome)}</b>${i.perfil === 'admin' ? ' <span class="chip am">Admin</span>' : ''}<div class="mut sm">${esc(AREAS[i.area] || 'Sem área')} · ${i.matricula ? 'Matrícula ' + esc(i.matricula) : 'Sem matrícula'}${i.ativo ? '' : ' · <b style="color:var(--vm)">desativado</b>'}</div>
+    <div class="acesso">${i.login ? `<span>Login: <strong>${esc(i.login)}</strong></span><span>Senha: <strong class="senha">${V.verSenhas ? esc(i.senha || '') : '••••••'}</strong></span>` : '<span style="color:var(--vm)">Sem login</span>'}</div></div>
+    <div class="btns" style="width:100%;margin-top:6px;justify-content:flex-end"><button class="btn sec peq" data-a="editarInsp" data-id="${i.id}">Editar</button>${i.login ? `<button class="btn wa peq" data-a="enviarAcesso" data-id="${i.id}">${ICO.whats} Enviar acesso</button>` : ''}<button class="btn ${i.ativo ? 'lin' : 'vd'} peq" data-a="inspAtivo" data-id="${i.id}" data-v="${i.ativo ? 0 : 1}">${i.ativo ? 'Desativar' : 'Ativar'}</button></div></div>`).join('') || '<div class="mut">Nenhum.</div>'}</div>`;
 }
 
 /* ----- Rolos e cavaletes: cadastro geral, igual para todos ----- */
@@ -951,7 +972,7 @@ function vPrincipal() {
   const corpo = { inicio: vInicio, insp: vInspecao, lista: vListas, ind: vIndicadores, mat: vMateriais, conta: vConta, equip: vEquip }[V.tela](D);
   const nav = [['inicio', 'Início'], ['insp', 'Faróis']]
     .map(([k, n]) => `<button class="${V.tela === k || (k === 'inicio' && (V.tela === 'equip' || V.tela === 'conta')) ? 'on' : ''}" data-a="tela" data-v="${k}">${ICO[k]}${n}</button>`).join('');
-  return `<header class="top"><h1>${esc(tit)}${V.tela === 'inicio' ? '' : `<small>${esc(S.eu ? S.eu.nome : '')}</small>`}</h1><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(st)}</button><button class="cta" data-a="trocarInsp" aria-label="Trocar de inspetor">${ICO.conta}<span>Trocar</span></button></header>
+  return `<header class="top"><h1>${esc(tit)}${V.tela === 'inicio' ? '' : `<small>${esc(S.eu ? S.eu.nome : '')}</small>`}</h1><button class="st ${S.online ? '' : 'off'}" data-a="sync">${esc(st)}</button><button class="cta" data-a="trocarInsp" aria-label="${S.admin ? 'Trocar de inspetor' : 'Sair'}">${ICO.conta}<span>${S.admin ? 'Trocar' : 'Sair'}</span></button></header>
   <main>${navBotao()}${corpo}</main><nav class="nav">${nav}</nav>`;
 }
 
@@ -2003,7 +2024,7 @@ const A = {
   escolherArea(el) { S.area = el.dataset.v; ls.set('area', S.area); mudou(); V.fora = 'lista'; V.listaSel = null; ls.del('listaSel'); render(); scrollTo(0, 0); },
   trocarArea() { S.area = ''; S.eu = null; V.insp = null; ls.del('area'); mudou(); render(); scrollTo(0, 0); },
   escolherInsp(el) { if (el.dataset.disc) ls.set('disc.' + el.dataset.id, el.dataset.disc); S.disc = el.dataset.disc || S.disc; escolherInsp(el.dataset.id); },
-  trocarInsp() { S.eu = null; V.insp = null; V.fora = 'lista'; V.tela = 'inicio'; fecharModal(); render(); scrollTo(0, 0); },
+  trocarInsp() { if (!S.admin) { A.sair(); return; } S.eu = null; V.insp = null; V.fora = 'lista'; V.tela = 'inicio'; fecharModal(); render(); scrollTo(0, 0); },
   confirmarOk() { const f = _volta; _volta = null; fecharModal(); f && f(); },
   voltar() { if (!navVoltar()) render(); },
   tela(el) { V.tela = el.dataset.v; fecharModal(); render(); scrollTo(0, 0); },
@@ -2162,17 +2183,14 @@ const A = {
   },
   async linkCadastro() {
     try {
-      const r = await api({ action: 'links', codigo: S.codigo });
-      if (!r.ok) return toast(msg(r.erro));
-      if (!r.codigoEquipe) return toast('Troque o CODIGO_EQUIPE no servidor antes de enviar o link.', 5000);
-      const link = location.origin + location.pathname + '?s=' + encodeURIComponent(S.srv) + '&e=' + encodeURIComponent(r.codigoEquipe);
-      abrirWhats('*Mapa das Correias*\nAbra no Chrome, toque em "Cadastrar inspetor" (só na primeira vez) e depois no menu ⋮ > "Instalar app":\n' + link);
+      const link = location.origin + location.pathname + '?s=' + encodeURIComponent(S.srv);
+      abrirWhats('*Mapa das Correias*\nAbra no Chrome, entre com o login e a senha que o administrador te passou e depois toque no menu ⋮ > "Instalar app":\n' + link);
     } catch (e) { toast('Sem conexão com o servidor.'); }
   },
   async linkPainel() {
     // qualquer inspetor pode abrir ou mandar o link do Mapa de faróis; o link leva sempre o código da equipe
-    let eq = S.codigo;
-    if (S.admin) { eq = ls.get('codigoEquipe', ''); if (!eq) { try { const r = await api({ action: 'links', codigo: S.codigo }); if (r.ok && r.codigoEquipe) eq = r.codigoEquipe; } catch (e) { } } if (!eq) return toast('Sem conexão com o servidor. Tente de novo com internet.'); }
+    let eq = S.codigoMapa || ls.get('codigoMapa', '');
+    if (!eq && S.admin) { eq = ls.get('codigoEquipe', ''); if (!eq) { try { const r = await api({ action: 'links', codigo: S.codigo }); if (r.ok && r.codigoEquipe) eq = r.codigoEquipe; } catch (e) { } } if (!eq) return toast('Sem conexão com o servidor. Tente de novo com internet.'); }
     const base = location.origin + location.pathname.replace(/[^/]*$/, '');
     const link = base + 'painel.html?s=' + encodeURIComponent(S.srv) + '&e=' + encodeURIComponent(eq) + '&a=' + (S.area || 'patios');
     abrirModal('Mapa de faróis (web)', `<p class="mut" style="margin-top:0">Abra no notebook, na TV da sala ou no próprio celular. Mostra os faróis de todos os equipamentos (Mecânica, Elétrica e Instrumentação) e atualiza sozinho a cada minuto. É só para consulta.</p>
@@ -2188,6 +2206,7 @@ const A = {
     abrirModal('Editar inspetor', `<form data-f="inspEditar" data-id="${i.id}"><label class="l" for="iNome">Nome completo</label><input class="in" id="iNome" name="nome" value="${esc(i.nome)}" required>
       <label class="l" for="iMat">Matrícula (opcional)</label><input class="in" id="iMat" name="matricula" value="${esc(i.matricula || '')}">
       <label class="l" for="iArea">Área</label><select class="in" id="iArea" name="area">${Object.keys(AREAS).map(k => `<option value="${k}" ${i.area === k ? 'selected' : ''}>${esc(AREAD[k])}</option>`).join('')}</select>
+      ${camposAcesso(i)}
       <div class="erro" id="fe" style="display:none"></div><button class="btn w" style="margin-top:14px">Salvar</button></form>`);
   },
   async inspAtivo(el) {
@@ -2306,12 +2325,13 @@ const FORM = {
     if (Object.values(dados().insp).some(i => chave(i.nome) === chave(nome))) return erroForm(msg('nome-existe'));
     const b = f.querySelector('button'); b.disabled = true;
     try {
-      const r = await api({ action: 'cadastro', codigo: S.codigo, nome, matricula: mat, area: S.area, email });
+      const ac = lerAcesso(f); if (ac.erro) return erroForm(ac.erro);
+      const r = await api({ action: 'cadastro', codigo: S.codigo, nome, matricula: mat, area: f.area.value, email, login: ac.login, senha: ac.senha, perfil: ac.perfil });
       if (!r.ok) return erroForm(msg(r.erro));
       receber(r); S.online = true;
-      escolherInsp(r.inspId);
-      toast('Cadastro feito. Agora cadastre o seu primeiro equipamento.', 5000);
-      mEquip(null);
+      V.fora = 'admin'; render(); scrollTo(0, 0);
+      toast('Inspetor cadastrado.', 4000);
+      if (ac.login) mEnviarAcesso(r.inspId);
     } catch (e) { erroForm('Sem internet. O cadastro do inspetor precisa de conexão; tente de novo com sinal.'); }
     finally { if (b.isConnected) b.disabled = false; }
   },
@@ -2328,7 +2348,8 @@ const FORM = {
   },
   async inspEditar(f) {
     try {
-      const r = await api({ action: 'inspEditar', codigo: S.codigo, inspId: f.dataset.id, nome: f.nome.value.trim(), matricula: f.matricula.value.trim(), area: f.area.value });
+      const ac = lerAcesso(f); if (ac.erro) return erroForm(ac.erro);
+      const r = await api({ action: 'inspEditar', codigo: S.codigo, inspId: f.dataset.id, nome: f.nome.value.trim(), matricula: f.matricula.value.trim(), area: f.area.value, login: ac.login, senha: ac.senha, perfil: ac.perfil });
       if (!r.ok) return erroForm(msg(r.erro));
       receber(r); fecharModal(); render(); toast('Inspetor atualizado.');
     } catch (e) { erroForm('Sem conexão com o servidor.'); }
@@ -2384,6 +2405,7 @@ const FORM = {
 };
 function escolherInsp(id) {
   const i = dados().insp[id]; if (!i || !i.ativo) return;
+  if (!S.admin && (sess.get('sessao') || {}).eu !== id) return;   // inspetor só entra na própria página
   S.eu = { id: i.id, nome: i.nome, matricula: i.matricula, area: i.area, email: i.email || '' }; ls.set('ultimo', i.id);
   V.insp = ls.get('insp.' + i.id, null); V.listaSel = null;
   V.tela = V.insp ? 'insp' : 'inicio'; fecharModal(); render(); scrollTo(0, 0);
@@ -2585,13 +2607,157 @@ const m0 = k => MAPA.find(m => m.k === k);
 /* recolher/expandir as disciplinas na lista de inspetores */
 document.addEventListener('toggle', ev => { const g = ev.target; if (!g.classList || !g.classList.contains('dbox')) return; if ((document.querySelector('[data-k=busca]') || {}).value) return; const f = ls.get('grpFechado', {}); if (g.open) delete f[g.dataset.g]; else f[g.dataset.g] = 1; ls.set('grpFechado', f); }, true);
 A.grpTodos = el => { const ab = el.dataset.v === '1', f = {}; document.querySelectorAll('details.dbox').forEach(g => { g.open = ab; if (!ab) f[g.dataset.g] = 1; }); ls.set('grpFechado', f); };
+/* ===== LOGIN: login e senha cadastrados pelo administrador; biometria opcional em cada aparelho ===== */
+Object.assign(MSG, {
+  'login': 'Login ou senha incorretos.', 'login-bloqueado': 'Muitas tentativas erradas. Espere 15 minutos e tente de novo.',
+  'login-inativo': 'Seu acesso está desativado. Fale com o administrador.', 'sessao': 'Sua sessão terminou. Entre de novo.',
+  'login-invalido': 'Login: de 3 a 30 caracteres, só letras minúsculas sem acento, números, ponto, hífen ou sublinhado.',
+  'login-existe': 'Esse login já é de outro inspetor.', 'senha-invalida': 'Senha: de 4 a 40 caracteres, sem espaço.'
+});
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const deB64u = t => Uint8Array.from(atob(t.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((t.length + 3) % 4)), c => c.charCodeAt(0));
+const aleat = n => crypto.getRandomValues(new Uint8Array(n));
+async function hashSenha(salt, senha) { return b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + '|' + senha))); }
+const normLogin = v => String(v || '').trim().toLowerCase();
+/* campos de acesso do inspetor (formulários do administrador) */
+function camposAcesso(i) {
+  return `<div class="acbox"><b>Acesso ao app</b>
+    <label class="l" for="xLogin">Login</label><input class="in" id="xLogin" name="login" value="${esc(i.login || '')}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ex.: josimar.leandro">
+    <label class="l" for="xSenha">Senha</label><div class="row" style="gap:8px"><input class="in f" id="xSenha" name="senha" type="text" value="${esc(i.senha || '')}" autocomplete="off" autocapitalize="none" spellcheck="false"><button type="button" class="btn sec peq" data-a="gerarSenha">Gerar</button></div>
+    <label class="l" for="xPerfil">Perfil</label><select class="in" id="xPerfil" name="perfil"><option value="inspetor" ${i.perfil !== 'admin' ? 'selected' : ''}>Inspetor</option><option value="admin" ${i.perfil === 'admin' ? 'selected' : ''}>Administrador (cadastra inspetores e vê as senhas)</option></select>
+    <div class="dica">Deixe login e senha em branco para o inspetor ficar sem acesso. Ao trocar a senha, o inspetor precisa entrar de novo (e reativar a biometria).</div></div>`;
+}
+function lerAcesso(f) {
+  const login = normLogin(f.login.value), senha = f.senha.value.trim(), perfil = f.perfil.value;
+  if (login && !/^[a-z0-9._-]{3,30}$/.test(login)) return { erro: msg('login-invalido') };
+  if (login && (senha.length < 4 || /\s/.test(senha))) return { erro: msg('senha-invalida') };
+  if (!login && senha) return { erro: 'Preencha o login também.' };
+  return { login, senha, perfil };
+}
+A.gerarSenha = () => { const c = 'abcdefghjkmnpqrstuvwxyz23456789', r = aleat(6); $('#xSenha').value = Array.from(r, x => c[x % c.length]).join(''); };
+A.verSenhas = () => { V.verSenhas = !V.verSenhas; render(); };
+function mEnviarAcesso(id) {
+  const i = dados().insp[id]; if (!i || !i.login) return;
+  const link = location.origin + location.pathname + '?s=' + encodeURIComponent(S.srv);
+  abrirWhats(`*Mapa das Correias*\nOlá, ${i.nome.split(' ')[0]}! Seu acesso ao app:\nLogin: *${i.login}*\nSenha: *${i.senha}*\n\nAbra no Chrome: ${link}\nDepois toque no menu ⋮ > "Instalar app". No primeiro acesso o app oferece entrar pela biometria.`);
+}
+A.enviarAcesso = el => mEnviarAcesso(el.dataset.id);
+/* tela de login */
+function vLogin() {
+  const bios = S.bioOk ? ls.get('bio', []) : [];
+  return `<div class="ent"><div class="logo"><img src="icon-192.png" alt=""><h1>Mapa das Correias</h1><div class="mut">Faróis dos transportadores de correia</div></div>
+  ${bios.length ? `<div class="card"><h2>Entrar com biometria</h2>${bios.map(b => `<div class="row" style="gap:8px;margin-top:8px"><button class="btn w f bio" data-a="entrarBio" data-l="${esc(b.l)}">👆 ${esc(b.n || b.l)}</button><button class="btn lin peq" data-a="esquecerBio" data-l="${esc(b.l)}" aria-label="Remover biometria de ${esc(b.n || b.l)}">✕</button></div>`).join('')}
+    <div class="dica">Digital ou reconhecimento facial deste aparelho.</div></div>` : ''}
+  <form class="card" data-f="login" autocomplete="on"><h2>${bios.length ? 'Ou entre com login e senha' : 'Entrar'}</h2>
+  <label class="l" for="lLogin">Login</label><input class="in" id="lLogin" name="login" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(ls.get('ultLogin', ''))}" required>
+  <label class="l" for="lSenha">Senha</label><div class="row" style="gap:8px"><input class="in f" id="lSenha" name="senha" type="password" autocomplete="current-password" required><button type="button" class="btn sec peq" data-a="mostrarSenha" aria-label="Mostrar senha">👁</button></div>
+  <div class="erro" id="fe" style="display:none"></div>
+  <button class="btn w" style="margin-top:14px">Entrar</button>
+  <div class="dica">Login e senha são cadastrados pelo administrador. Esqueceu? Fale com ele.</div></form>
+  <div style="text-align:center"><button class="btn sec peq" data-a="trocarServidor">Trocar servidor</button></div>${cartaoDev()}</div>`;
+}
+A.mostrarSenha = () => { const i = $('#lSenha'); i.type = i.type === 'password' ? 'text' : 'password'; };
+/* entrou: guarda a sessão (só nesta aba), a cópia para entrar sem internet e oferece a biometria */
+async function entrar(r, lg, senha, comBio) {
+  S.token = S.codigo = r.token; S.master = !!r.master;
+  if (r.codigoMapa) { S.codigoMapa = r.codigoMapa; ls.set('codigoMapa', r.codigoMapa); }
+  sess.set('sessao', { token: r.token, eu: r.eu || r.inspId || '', master: S.master });
+  receber(r); S.online = !r._offline; ls.set('ultLogin', lg);
+  const acc = ls.get('acc', {}), ant = acc[lg] || {};
+  acc[lg] = { token: r.token, eu: r.eu || r.inspId || '', master: S.master, admin: !!r.admin, nome: r.master ? 'Administrador' : ((S.base.insp[r.eu || r.inspId] || {}).nome || lg) };
+  if (senha) { acc[lg].salt = b64u(aleat(12)); acc[lg].h = await hashSenha(acc[lg].salt, senha); } else { acc[lg].salt = ant.salt; acc[lg].h = ant.h; }
+  ls.set('acc', acc);
+  const eu = acc[lg].eu;
+  S.eu = null; V.insp = null; V.fora = 'lista'; V.tela = 'inicio';
+  if (eu && S.base.insp[eu]) { S.area = S.base.insp[eu].area; ls.set('area', S.area); escolherInsp(eu); }
+  else { if (!S.master) S.area = ''; render(); }
+  scrollTo(0, 0);
+  if (!comBio && S.bioOk && !ls.get('bio', []).some(b => b.l === lg) && !ls.get('bioNao', {})[lg]) setTimeout(() => oferecerBio(lg, acc[lg].nome), 400);
+}
+function restaurarSessao() {
+  const x = sess.get('sessao'); if (!x || !x.token) return;
+  const D = S.base || {};
+  if (x.eu && D.insp && D.insp[x.eu]) { S.area = D.insp[x.eu].area; S.eu = null; escolherInsp(x.eu); }
+}
+FORM.login = async f => {
+  const lg = normLogin(f.login.value), senha = f.senha.value, b = f.querySelector('button:not([type=button])');
+  if (!lg || !senha) return;
+  b.disabled = true; b.textContent = 'Entrando…';
+  try {
+    const r = await api({ action: 'login', login: lg, senha });
+    if (!r.ok) { b.disabled = false; b.textContent = 'Entrar'; return erroForm(msg(r.erro)); }
+    await entrar(r, lg, senha);
+  } catch (e) {
+    // sem internet: confere a senha com a cópia guardada no último login feito neste aparelho
+    const a = ls.get('acc', {})[lg];
+    if (a && a.h && a.token && await hashSenha(a.salt, senha) === a.h) { await entrar(Object.assign({ _offline: true, token: a.token, eu: a.eu, master: a.master, admin: a.admin }, S.base ? { equip: Object.values(S.base.equip), tipo: Object.values(S.base.tipo), rol: Object.values(S.base.rol), insp: Object.values(S.base.insp) } : {}), lg, '', false); toast('Sem internet: entrou com os dados guardados no aparelho. Os faróis são enviados quando o sinal voltar.', 6000); return; }
+    b.disabled = false; b.textContent = 'Entrar';
+    erroForm(a ? 'Sem internet e a senha não confere com a do último acesso neste aparelho.' : 'Sem internet. O primeiro acesso neste aparelho precisa de conexão.');
+  }
+};
+A.sair = () => {
+  const fim = () => { const lg = ls.get('ultLogin', ''); sess.set('sessao', null); S.token = S.codigo = ''; S.eu = null; S.master = false; S.admin = false; V.insp = null; V.tela = 'inicio'; V.fora = 'lista'; V.todos = false; fecharModal(); render(); scrollTo(0, 0); };
+  if (S.fila.length) return confirmar('Sair', `Há ${S.fila.length} registro(s) ainda não enviado(s). Se outra pessoa entrar neste aparelho antes de enviar, eles podem se perder. Conecte à internet e espere enviar antes de sair.`, fim, 'Sair mesmo assim', 'vm');
+  confirmar('Sair', 'Para entrar de novo, use o login e a senha (ou a biometria).', fim, 'Sair');
+};
+function sairSessao(aviso) {
+  const lg = ls.get('ultLogin', ''), acc = ls.get('acc', {});
+  if (acc[lg]) { delete acc[lg]; ls.set('acc', acc); }
+  ls.set('bio', ls.get('bio', []).filter(b => b.l !== lg));
+  sess.set('sessao', null); S.token = S.codigo = ''; S.eu = null; S.master = false; S.admin = false; V.insp = null; fecharModal(); render();
+  if (aviso) toast(aviso, 6000);
+}
+/* biometria (WebAuthn, autenticador do próprio aparelho): libera a sessão guardada no último login */
+S.bioOk = false;
+async function bioPreparar() {
+  try { S.bioOk = !!(window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch (e) { S.bioOk = false; }
+  if (S.bioOk && !S.codigo) render();
+}
+function oferecerBio(lg, nome) {
+  abrirModal('Entrar com biometria?', `<p class="mut" style="margin-top:0">Nas próximas vezes, entre neste aparelho com a sua digital ou o reconhecimento facial, sem digitar a senha.</p>
+    <div class="btns"><button class="btn" data-a="ativarBio" data-l="${esc(lg)}" data-n="${esc(nome || lg)}">👆 Ativar biometria</button><button class="btn sec" data-a="bioNao" data-l="${esc(lg)}">Agora não</button></div>
+    <div class="dica">Vale só para este aparelho. Se a senha for trocada, é preciso entrar com a senha nova e ativar de novo.</div>`);
+}
+A.bioNao = el => { const n = ls.get('bioNao', {}); n[el.dataset.l] = 1; ls.set('bioNao', n); fecharModal(); };
+A.ativarBio = async el => {
+  const lg = el.dataset.l, nome = el.dataset.n;
+  try {
+    const c = await navigator.credentials.create({ publicKey: {
+      challenge: aleat(32), rp: { name: 'Mapa das Correias' },
+      user: { id: aleat(16), name: lg, displayName: nome },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000, attestation: 'none' } });
+    if (!c) throw new Error('cancelado');
+    ls.set('bio', ls.get('bio', []).filter(b => b.l !== lg).concat({ l: lg, n: nome, id: b64u(c.rawId) }));
+    fecharModal(); toast('Biometria ativada neste aparelho.');
+  } catch (e) { fecharModal(); toast('Biometria não ativada. Você pode ativar no próximo login.', 4000); }
+};
+A.esquecerBio = el => confirmar('Remover biometria', 'Este aparelho deixa de entrar com a biometria deste login.', () => { ls.set('bio', ls.get('bio', []).filter(b => b.l !== el.dataset.l)); render(); }, 'Remover');
+A.entrarBio = async el => {
+  const lg = el.dataset.l, b = ls.get('bio', []).find(x => x.l === lg), a = ls.get('acc', {})[lg];
+  if (!b || !a || !a.token) { toast('Entre com login e senha.'); return; }
+  try {
+    const c = await navigator.credentials.get({ publicKey: { challenge: aleat(32), allowCredentials: [{ type: 'public-key', id: deB64u(b.id) }], userVerification: 'required', timeout: 60000 } });
+    if (!c) throw new Error('cancelado');
+  } catch (e) { toast('Biometria não confirmada. Tente de novo ou use a senha.', 4000); return; }
+  // confere no servidor se a sessão ainda vale (senha não foi trocada); sem internet, entra com o que está no aparelho
+  try {
+    const r = await api({ action: 'sync', token: a.token });
+    if (!r.ok) { if (r.erro === 'sessao') { ls.set('bio', ls.get('bio', []).filter(x => x.l !== lg)); render(); toast('Sua senha foi alterada. Entre com a senha nova e ative a biometria de novo.', 6000); return; } throw new Error(r.erro); }
+    await entrar(Object.assign(r, { token: a.token, codigoMapa: S.codigoMapa }), lg, '', true);
+  } catch (e) {
+    await entrar(Object.assign({ _offline: true, token: a.token, eu: a.eu, master: a.master, admin: a.admin }, S.base ? { equip: Object.values(S.base.equip), tipo: Object.values(S.base.tipo), rol: Object.values(S.base.rol), insp: Object.values(S.base.insp) } : {}), lg, '', true);
+    toast('Sem internet: entrou com os dados guardados no aparelho.', 5000);
+  }
+};
 /* ===== início ===== */
 (function () {
   const q = new URLSearchParams(location.search);
   if (q.get('s') && /^https:\/\/script\.google\.com\//.test(q.get('s'))) { S.srv = q.get('s'); ls.set('srv', S.srv); }
-  if (q.get('e')) { S.codigo = q.get('e'); ls.set('codigo', S.codigo); }
+  if (q.get('e')) { S.codigoMapa = q.get('e'); ls.set('codigoMapa', S.codigoMapa); }
   if (q.get('s') || q.get('e')) history.replaceState(null, '', location.pathname);
-  render();
+  restaurarSessao();
+  render(); bioPreparar();
   if (S.codigo) sincronizar(true);
   setInterval(() => { if (document.visibilityState === 'visible') sincronizar(true); }, 60000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sincronizar(true); });
