@@ -481,7 +481,7 @@ const precoIn = v => v === undefined || v === null || v === '' ? '' : Number(v).
 const plural = (n, a, b) => nfmt(n) + ' ' + (n === 1 ? a : b);
 
 /* ===== armazenamento no aparelho ===== */
-const APP_VERSAO = '2026-10-31 · v17 (login)';
+const APP_VERSAO = '2026-11-10 · v18 (login + TV)';
 const LS = 'mc.';   // Mapa das Correias: memória separada do app Inspeção de Rolos
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -897,7 +897,7 @@ function vFora() {
 }
 function vListaInsp(D) {
   const ult = ls.get('ultimo', ''), at = itensAtivos(D);
-  const l = Object.values(D.insp).filter(i => i.ativo && i.area === S.area).sort((a, b) => cmpTxt(a.nome, b.nome));
+  const l = Object.values(D.insp).filter(i => i.ativo && i.area === S.area && !i.tv).sort((a, b) => cmpTxt(a.nome, b.nome));   // o acesso da TV não é inspetor
   // uma linha por inspetor dentro da disciplina (quem atua em duas aparece nas duas)
   const linha = (i, d) => {
     const eqs = d ? equipsDisc(D, d, i.id) : [], fs = eqs.map(e => farolDe(e, d));
@@ -928,11 +928,11 @@ function vListaInsp(D) {
   <div style="height:8px"></div>${cartaoDev()}`;
 }
 function vAdminInsp(D) {
-  const sem = Object.values(D.insp).filter(i => i.ativo && !i.login).length;
+  const sem = Object.values(D.insp).filter(i => i.ativo && !i.login && !i.tv).length;
   return `<div class="card"><div class="row"><div class="f"><h2 style="margin:0">Inspetores e acessos</h2><div class="mut sm">Login e senha de cada inspetor. Só o administrador vê esta tela.</div></div><button class="btn peq" data-a="fora" data-v="cadastro">+ Novo</button></div>
   ${sem ? `<div class="aviso" style="margin-top:10px">${sem} inspetor(es) ativo(s) ainda sem login: não conseguem entrar no app. Toque em Editar para criar.</div>` : ''}
   <div class="btns" style="margin-top:10px"><button class="btn sec peq" data-a="verSenhas">${V.verSenhas ? '🙈 Esconder senhas' : '👁 Ver senhas'}</button></div>
-  ${Object.values(D.insp).sort((a, b) => cmpTxt(a.nome, b.nome)).map(i => `<div class="li" style="flex-wrap:wrap"><span class="av">${esc(iniciais(i.nome))}</span><div class="f"><b>${esc(i.nome)}</b>${i.perfil === 'admin' ? ' <span class="chip am">Admin</span>' : ''}<div class="mut sm">${esc(AREAS[i.area] || 'Sem área')} · ${i.matricula ? 'Matrícula ' + esc(i.matricula) : 'Sem matrícula'}${i.ativo ? '' : ' · <b style="color:var(--vm)">desativado</b>'}</div>
+  ${Object.values(D.insp).sort((a, b) => cmpTxt(a.nome, b.nome)).map(i => `<div class="li" style="flex-wrap:wrap"><span class="av">${esc(iniciais(i.nome))}</span><div class="f"><b>${esc(i.nome)}</b>${i.perfil === 'admin' ? ' <span class="chip am">Admin</span>' : i.perfil === 'tv' ? ' <span class="chip az">TV</span>' : ''}<div class="mut sm">${esc(AREAS[i.area] || 'Sem área')} · ${i.matricula ? 'Matrícula ' + esc(i.matricula) : 'Sem matrícula'}${i.ativo ? '' : ' · <b style="color:var(--vm)">desativado</b>'}</div>
     <div class="acesso">${i.login ? `<span>Login: <strong>${esc(i.login)}</strong></span><span>Senha: <strong class="senha">${V.verSenhas ? esc(i.senha || '') : '••••••'}</strong></span>` : '<span style="color:var(--vm)">Sem login</span>'}</div></div>
     <div class="btns" style="width:100%;margin-top:6px;justify-content:flex-end"><button class="btn sec peq" data-a="editarInsp" data-id="${i.id}">Editar</button>${i.login ? `<button class="btn wa peq" data-a="enviarAcesso" data-id="${i.id}">${ICO.whats} Enviar acesso</button>` : ''}<button class="btn ${i.ativo ? 'lin' : 'vd'} peq" data-a="inspAtivo" data-id="${i.id}" data-v="${i.ativo ? 0 : 1}">${i.ativo ? 'Desativar' : 'Ativar'}</button></div></div>`).join('') || '<div class="mut">Nenhum.</div>'}</div>`;
 }
@@ -1945,7 +1945,7 @@ function selTipo(D, cat, nome, v) {
    aparece sozinho na carteira de cada inspetor escolhido */
 function camposEquip(D, e, id) {
   const tipo = e.soBal ? (e.bal === 'dos' ? 'dos' : 'tem') : (!id && S.disc === 'bal' ? 'tem' : 'tr');
-  const ins = Object.values(D.insp).filter(i => i.ativo).sort((a, b) => cmpTxt(a.nome, b.nome));
+  const ins = Object.values(D.insp).filter(i => i.ativo && !i.tv).sort((a, b) => cmpTxt(a.nome, b.nome));
   const op = sel => '<option value="">Nenhum</option>' + ins.map(i => `<option value="${esc(i.id)}" ${sel === i.id ? 'selected' : ''}>${esc(i.nome)}</option>`).join('');
   const eu = S.eu ? S.eu.id : '';
   const mec = id ? (!e.soEle && !e.soBal ? e.inspId : '') : (S.disc === 'mec' ? eu : '');
@@ -2188,14 +2188,13 @@ const A = {
     } catch (e) { toast('Sem conexão com o servidor.'); }
   },
   async linkPainel() {
-    // qualquer inspetor pode abrir ou mandar o link do Mapa de faróis; o link leva sempre o código da equipe
-    let eq = S.codigoMapa || ls.get('codigoMapa', '');
-    if (!eq && S.admin) { eq = ls.get('codigoEquipe', ''); if (!eq) { try { const r = await api({ action: 'links', codigo: S.codigo }); if (r.ok && r.codigoEquipe) eq = r.codigoEquipe; } catch (e) { } } if (!eq) return toast('Sem conexão com o servidor. Tente de novo com internet.'); }
+    // o Mapa de faróis também pede login: na TV, use o acesso de apresentação; no celular, o próprio login
     const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-    const link = base + 'painel.html?s=' + encodeURIComponent(S.srv) + '&e=' + encodeURIComponent(eq) + '&a=' + (S.area || 'patios');
-    abrirModal('Mapa de faróis (web)', `<p class="mut" style="margin-top:0">Abra no notebook, na TV da sala ou no próprio celular. Mostra os faróis de todos os equipamentos (Mecânica, Elétrica e Instrumentação) e atualiza sozinho a cada minuto. É só para consulta.</p>
-      <textarea class="in" id="txtCopia" readonly style="min-height:96px;font-size:13px">${esc(link)}</textarea>
-      <div class="btns" style="margin-top:10px"><a class="btn" href="${esc(link)}" target="_blank" rel="noopener">Abrir o mapa</a><button class="btn sec" data-a="copiarLink">Copiar link</button><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent('*Mapa de faróis - Mapa das Correias*\nAbra no Chrome (notebook, TV ou celular): ' + link)}" target="_blank" rel="noopener">${ICO.whats} Enviar</a></div>`);
+    const link = base + 'painel.html?s=' + encodeURIComponent(S.srv) + '&a=' + (S.area || 'patios');
+    abrirModal('Mapa de faróis (web)', `<p class="mut" style="margin-top:0">Abra no notebook, na TV da sala ou no próprio celular. Mostra os faróis de todos os equipamentos (Mecânica, Elétrica e Instrumentação) e atualiza sozinho a cada minuto.</p>
+      <p class="mut">O mapa pede login: na TV, use o acesso de <b>apresentação</b>; no celular ou no notebook, pode usar o seu próprio login.</p>
+      <textarea class="in" id="txtCopia" readonly style="min-height:80px;font-size:13px">${esc(link)}</textarea>
+      <div class="btns" style="margin-top:10px"><a class="btn" href="${esc(link)}" target="_blank" rel="noopener">Abrir o mapa</a><button class="btn sec" data-a="copiarLink">Copiar link</button><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent('*Mapa de faróis - Mapa das Correias*\nAbra no Chrome e entre com o seu login: ' + link)}" target="_blank" rel="noopener">${ICO.whats} Enviar</a></div>`);
   },
   copiarLink() { const el = $('#txtCopia'); try { navigator.clipboard.writeText(el.value).then(() => toast('Link copiado.'), () => { el.select(); }); } catch (e) { el.select(); } },
   async abrirPlanilha() {
@@ -2624,7 +2623,7 @@ function camposAcesso(i) {
   return `<div class="acbox"><b>Acesso ao app</b>
     <label class="l" for="xLogin">Login</label><input class="in" id="xLogin" name="login" value="${esc(i.login || '')}" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ex.: josimar.leandro">
     <label class="l" for="xSenha">Senha</label><div class="row" style="gap:8px"><input class="in f" id="xSenha" name="senha" type="text" value="${esc(i.senha || '')}" autocomplete="off" autocapitalize="none" spellcheck="false"><button type="button" class="btn sec peq" data-a="gerarSenha">Gerar</button></div>
-    <label class="l" for="xPerfil">Perfil</label><select class="in" id="xPerfil" name="perfil"><option value="inspetor" ${i.perfil !== 'admin' ? 'selected' : ''}>Inspetor</option><option value="admin" ${i.perfil === 'admin' ? 'selected' : ''}>Administrador (cadastra inspetores e vê as senhas)</option></select>
+    <label class="l" for="xPerfil">Perfil</label><select class="in" id="xPerfil" name="perfil"><option value="inspetor" ${i.perfil !== 'admin' ? 'selected' : ''}>Inspetor</option><option value="admin" ${i.perfil === 'admin' ? 'selected' : ''}>Administrador (cadastra inspetores e vê as senhas)</option><option value="tv" ${i.perfil === 'tv' ? 'selected' : ''}>Apresentação / TV (só vê o Mapa de faróis)</option></select>
     <div class="dica">Deixe login e senha em branco para o inspetor ficar sem acesso. Ao trocar a senha, o inspetor precisa entrar de novo (e reativar a biometria).</div></div>`;
 }
 function lerAcesso(f) {
@@ -2659,6 +2658,12 @@ function vLogin() {
 A.mostrarSenha = () => { const i = $('#lSenha'); i.type = i.type === 'password' ? 'text' : 'password'; };
 /* entrou: guarda a sessão (só nesta aba), a cópia para entrar sem internet e oferece a biometria */
 async function entrar(r, lg, senha, comBio) {
+  if (r.tv) {   // acesso de apresentação: só o Mapa de faróis
+    const link = location.origin + location.pathname.replace(/[^/]*$/, '') + 'painel.html';
+    render();
+    abrirModal('Acesso da TV', `<p class="mut" style="margin-top:0">Este login é só para o <b>Mapa de faróis</b> (apresentação na TV). Para preencher faróis, use o seu login de inspetor.</p><a class="btn w" href="${esc(link)}">Abrir o Mapa de faróis</a>`);
+    return;
+  }
   S.token = S.codigo = r.token; S.master = !!r.master;
   if (r.codigoMapa) { S.codigoMapa = r.codigoMapa; ls.set('codigoMapa', r.codigoMapa); }
   sess.set('sessao', { token: r.token, eu: r.eu || r.inspId || '', master: S.master });

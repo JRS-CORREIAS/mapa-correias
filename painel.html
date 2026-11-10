@@ -332,7 +332,7 @@ body.foco .det,body.foco .rod,body.foco .aviso{display:none}
 body.foco header{margin-bottom:4px;gap:10px}
 body.foco header .marca img{width:34px;height:34px}
 body.foco header .marca h1{font-size:20px}
-body.foco header .marca p,body.foco header .seg[aria-label="Área"],body.foco #bAjuste{display:none}
+body.foco header .marca p,body.foco header .seg[aria-label="Área"],body.foco #bAjuste,body.foco #bSair{display:none}
 body.foco header .ic{padding:8px 14px;font-size:14px}
 body.foco .mapa-ctl{margin-bottom:4px;gap:6px 16px}
 body.foco .mapa-ctl .temas.modo,body.foco .mapa-ctl .temas.estilo,body.foco .mapa-ctl label[for=mInsp],body.foco .mapa-ctl #mInsp{display:none}
@@ -372,7 +372,7 @@ const ehBal = e => e.bal === 'tem' || e.bal === 'dos';
 const DISC = { mec: { nome: 'Mecânica', titulo: 'Mapa da Mecânica', ico: '⚙', mapa: MAPA_MEC, filtro: e => !e.soEle && !e.soBal }, ele: { nome: 'Elétrica', titulo: 'Mapa da Elétrica', ico: '⚡', mapa: MAPA_ELE, filtro: e => !!e.inspEle, dono: e => e.inspEle }, bal: { nome: 'Instrumentação', titulo: 'Mapa da Instrumentação', ico: '⚖', mapa: MAPA_BAL, filtro: e => !!e.soBal || !!e.inspIns, dono: e => e.soBal ? e.inspId : e.inspIns, tipos: true } };
 const LS = 'mc.mapa.';
 const ls = { get(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } } };
-const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('codigo', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
+const S = { mapaInsp: '', ver: null, pilha: [], srv: ls.get('srv', SERVIDOR_PADRAO), codigo: ls.get('token', ''), area: ls.get('area', 'todas'), data: ls.get('data', null), sync: ls.get('sync', 0), erro: '', carregando: false };
 S.ajuste = ls.get('ajuste', false);
 S.disc = ls.get('disc', 'mec'); if (!DISC[S.disc]) S.disc = 'mec';
 /* Apresentação: alterna Mecânica → Elétrica → Instrumentação, 90 segundos em cada (continua depois de recarregar) */
@@ -415,8 +415,9 @@ async function carregar() {
   if (!S.srv || !S.codigo || S.carregando) return;
   S.carregando = true;
   try {
-    const r = await api({ action: 'sync', codigo: S.codigo });
-    if (!r.ok) { S.erro = r.erro === 'codigo-equipe' ? 'Código de acesso incorreto.' : 'Erro do servidor: ' + r.erro; if (r.erro === 'codigo-equipe') { S.codigo = ''; ls.set('codigo', ''); } }
+    // acesso por login: o token fica guardado neste aparelho (a TV não precisa entrar todo dia); senha trocada = entrar de novo
+    const r = await api({ action: 'sync', token: S.codigo });
+    if (!r.ok) { if (r.erro === 'sessao' || r.erro === 'codigo-equipe') { S.codigo = ''; ls.set('token', ''); S.data = null; ls.set('data', null); S.erro = 'O acesso mudou (senha trocada ou login desativado). Entre de novo.'; } else S.erro = 'Erro do servidor: ' + r.erro; }
     else { S.data = r; S.sync = Date.now(); S.erro = ''; ls.set('data', r); ls.set('sync', S.sync); }
   } catch (e) { S.erro = 'Sem conexão com o servidor. Mostrando os últimos dados recebidos.'; }
   S.carregando = false; render();
@@ -453,17 +454,31 @@ function calcular() {
 const barra = g => { const a = pct(g.amU, g.total), r = pct(g.vmU, g.total); return `<div class="bar"><i class="g" style="width:${Math.max(0, 100 - a - r)}%"></i><i class="y" style="width:${a}%"></i><i class="rr" style="width:${r}%"></i></div>`; };
 const sem = f => `<span class="sem" role="img" aria-label="Semáforo ${f ? FAROL[f].toLowerCase() : 'sem avaliação'}"><i class="${f === 'vm' ? 'on vm' : ''}"></i><i class="${f === 'am' ? 'on am' : ''}"></i><i class="${f === 'vd' ? 'on vd' : ''}"></i></span>`;
 
+// saída sem janela de confirmação do navegador (o painel não usa alert/confirm): dois cliques em até 3 s
+let _sairEm = 0;
+function confirmarSair() { const b = document.getElementById('bSair'), agora = Date.now(); if (agora - _sairEm < 3000) { _sairEm = 0; return true; } _sairEm = agora; if (b) { b.textContent = 'Toque de novo para sair'; setTimeout(() => { if (b.isConnected) b.textContent = 'Sair'; }, 3000); } return false; }
 function render() {
   MAPA = DISC[S.disc].mapa;
   document.body.classList.toggle('claro', S.modo === 'claro');
   S.ver = { t: 'mapa' };   // esta versão mostra só o mapa de faróis
   const app = document.getElementById('app');
   if (!S.srv || !S.codigo) {
-    app.innerHTML = `<form class="con" id="fCon"><h1>Mapa de faróis</h1><p>Use o link do painel enviado pelo administrador. Sem o link, informe o servidor e o código de acesso da equipe.</p>
-      <label for="cSrv">Endereço do servidor</label><input id="cSrv" value="${esc(S.srv)}" placeholder="https://script.google.com/macros/s/.../exec" required>
-      <label for="cCod">Código de acesso</label><input id="cCod" value="${esc(S.codigo)}" required>
-      ${S.erro ? `<p style="color:#ff9b91">${esc(S.erro)}</p>` : ''}<button>Abrir painel</button></form>`;
-    document.getElementById('fCon').onsubmit = ev => { ev.preventDefault(); S.srv = document.getElementById('cSrv').value.trim(); S.codigo = document.getElementById('cCod').value.trim(); ls.set('srv', S.srv); ls.set('codigo', S.codigo); render(); carregar(); };
+    app.innerHTML = `<form class="con" id="fCon" autocomplete="on"><img src="icon-512.png" alt="" style="width:72px;height:72px;border-radius:16px;display:block;margin:0 auto 10px"><h1 style="text-align:center">Mapa de faróis</h1><p style="text-align:center">Entre com o login de <b>apresentação</b> (TV) ou com o seu login do app.</p>
+      ${S.srv ? '' : `<label for="cSrv">Endereço do servidor</label><input id="cSrv" placeholder="https://script.google.com/macros/s/.../exec" required>`}
+      <label for="cLog">Login</label><input id="cLog" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(ls.get('ultLogin', ''))}" required>
+      <label for="cSen">Senha</label><input id="cSen" type="password" autocomplete="current-password" required>
+      <p id="cErr" style="color:#ff9b91">${esc(S.erro || '')}</p><button id="cBtn">Entrar</button></form>`;
+    document.getElementById('fCon').onsubmit = async ev => {
+      ev.preventDefault();
+      const sv = document.getElementById('cSrv'); if (sv) { S.srv = sv.value.trim(); ls.set('srv', S.srv); }
+      const lg = document.getElementById('cLog').value.trim().toLowerCase(), b = document.getElementById('cBtn'), er = document.getElementById('cErr');
+      b.disabled = true; b.textContent = 'Entrando…';
+      try {
+        const r = await api({ action: 'login', login: lg, senha: document.getElementById('cSen').value });
+        if (!r.ok) { er.textContent = { 'login': 'Login ou senha incorretos.', 'login-bloqueado': 'Muitas tentativas erradas. Espere 15 minutos.', 'login-inativo': 'Este acesso está desativado.' }[r.erro] || ('Erro: ' + r.erro); b.disabled = false; b.textContent = 'Entrar'; return; }
+        S.codigo = r.token; ls.set('token', r.token); ls.set('ultLogin', lg); S.data = r; S.sync = Date.now(); S.erro = ''; ls.set('data', r); ls.set('sync', S.sync); render();
+      } catch (e) { er.textContent = 'Sem conexão com o servidor.'; b.disabled = false; b.textContent = 'Entrar'; }
+    };
     return;
   }
   const C = calcular(), G = C.G, agora = new Date();
@@ -472,7 +487,7 @@ function render() {
     <div class="seg" role="group" aria-label="Área">${[['patios', 'Pátios'], ['cc7', 'CC7'], ['todas', 'Todas']].map(([k, n]) => `<button class="${S.area === k ? 'on' : ''}" data-area="${k}">${n}</button>`).join('')}</div>
     <button class="ic apres${S.apres ? ' on' : ''}" id="bApres" title="Abre em tela cheia, ajusta o mapa à tela e alterna sozinho entre Mecânica, Elétrica e Instrumentação, ${APRES_SEG} segundos em cada">${S.apres ? '■ Parar <span id="apT"></span>' : '▶ Apresentação'}</button>
     <button class="ic${S.ajuste ? ' on' : ''}" id="bAjuste" title="Encaixa o mapa inteiro na tela, sem rolar">${S.ajuste ? '✓ Ajustado à tela' : 'Ajustar à tela'}</button>
-    <button class="ic" id="bTela">${document.fullscreenElement ? "✕ Sair da tela cheia" : "Tela cheia"}</button>
+    <button class="ic" id="bTela">${document.fullscreenElement ? "✕ Sair da tela cheia" : "Tela cheia"}</button><button class="ic" id="bSair" title="Sair deste aparelho">Sair</button>
     <div class="hora"><b id="relogio">${p2(agora.getHours())}:${p2(agora.getMinutes())}</b>${fData(Date.now())}</div></header>
   ${S.erro ? `<div class="aviso">${esc(S.erro)}</div>` : ''}`;
   const rod = `<div class="rod"><span>Atualiza sozinho a cada minuto · última atualização ${S.sync ? p2(new Date(S.sync).getHours()) + ':' + p2(new Date(S.sync).getMinutes()) : '—'}</span><span>Desenvolvido por Jeferson Rodrigo dos Santos · Inspetor de automação e instrumentação · Pátios de Minérios - RED 2</span></div>`;
@@ -573,6 +588,7 @@ function ligar(app) {
   requestAnimationFrame(apresTique);
   document.getElementById('bAjuste').onclick = () => { S.ajuste = !S.ajuste; ls.set('ajuste', S.ajuste); render(); };
   requestAnimationFrame(ajustarMapa);
+  document.getElementById('bSair').onclick = () => { if (!confirmarSair()) return; S.codigo = ''; ls.set('token', ''); S.data = null; ls.set('data', null); S.erro = ''; if (S.apres) { S.apres = false; ls.set('apres', false); } render(); };
   document.getElementById('bTela').onclick = () => {
     const d = document;
     try { if (d.fullscreenElement) d.exitFullscreen(); else d.documentElement.requestFullscreen().catch(() => { }); } catch (e) { }
@@ -778,7 +794,7 @@ function vInsp(C, id) {
 (function () {
   const q = new URLSearchParams(location.search);
   if (q.get('s')) { S.srv = q.get('s'); ls.set('srv', S.srv); }
-  if (q.get('e')) { S.codigo = q.get('e'); ls.set('codigo', S.codigo); }
+  ls.set('codigo', null);   // versões antigas guardavam o código da equipe (agora é por login)
   if (q.get('a') && (AREAS[q.get('a')] || q.get('a') === 'todas')) { S.area = q.get('a'); ls.set('area', S.area); }
   if (q.get('s') || q.get('e')) history.replaceState(null, '', location.pathname);
   render(); carregar();
